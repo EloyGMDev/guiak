@@ -37,6 +37,9 @@ void dbResetDefaults() {
   nodeConfig.wifiEndHour   = 20;     // 20:30
   nodeConfig.wifiEndMin    = 30;
   nodeConfig.wifiScheduleEnabled = true;
+  strncpy(nodeConfig.firebaseHost, "https://guiak-default-rtdb.firebaseio.com", sizeof(nodeConfig.firebaseHost) - 1);
+  strncpy(nodeConfig.firebaseAuth, "", sizeof(nodeConfig.firebaseAuth) - 1);
+  nodeConfig.firebaseEnabled = true;
 
   dbSaveConfig();
   prefs.putBool("initialized", true);
@@ -62,6 +65,9 @@ void dbLoadConfig() {
   nodeConfig.wifiEndHour   = prefs.getUChar("wEndH", 20);
   nodeConfig.wifiEndMin    = prefs.getUChar("wEndM", 30);
   nodeConfig.wifiScheduleEnabled = prefs.getBool("wSchedEn", true);
+  prefs.getString("fbHost", nodeConfig.firebaseHost, sizeof(nodeConfig.firebaseHost));
+  prefs.getString("fbAuth", nodeConfig.firebaseAuth, sizeof(nodeConfig.firebaseAuth));
+  nodeConfig.firebaseEnabled = prefs.getBool("fbEn", true);
 }
 
 void dbSaveConfig() {
@@ -84,6 +90,9 @@ void dbSaveConfig() {
   prefs.putUChar("wEndH", nodeConfig.wifiEndHour);
   prefs.putUChar("wEndM", nodeConfig.wifiEndMin);
   prefs.putBool("wSchedEn", nodeConfig.wifiScheduleEnabled);
+  prefs.putString("fbHost", nodeConfig.firebaseHost);
+  prefs.putString("fbAuth", nodeConfig.firebaseAuth);
+  prefs.putBool("fbEn", nodeConfig.firebaseEnabled);
 }
 
 void dbIncrementAccessCount() {

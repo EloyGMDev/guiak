@@ -1,6 +1,7 @@
 #include "ble_beacon.h"
 #include "config.h"
 #include "audio_manager.h"
+#include "firebase_client.h"
 
 #include <BLEDevice.h>
 #include <BLEServer.h>
@@ -47,6 +48,7 @@ class TriggerCallbacks : public BLECharacteristicCallbacks {
       if (cmd == 1 || cmd == '1') {
         // Disparo de baliza acústica estándar
         playAcousticBeacon();
+        firebasePushLog("AUDIO", "Baliza acustica activada por la app movil");
       } else if (cmd == 2 || cmd == '2') {
         // Disparo de confirmación de llegada
         playArrivalChime();

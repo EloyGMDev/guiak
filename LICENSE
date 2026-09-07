@@ -1,55 +1,76 @@
 ===============================================================================
-ESPAÑOL / CASTELLANO
+LICENCIA DE SOFTWARE GUIAK (guiak.com)
 ===============================================================================
 Copyright (c) 2026 EloyGM. Todos los derechos reservados.
 
-Por la presente, no se concede permiso general para utilizar este software con 
-fines comerciales, distribuirlo, sublicenciarlo, vender copias o reclamar su 
-autoría como propia.
+-------------------------------------------------------------------------------
+1. ESPAÑOL / CASTELLANO
+-------------------------------------------------------------------------------
+El proyecto Guiak es un sistema de navegación asistida y accesibilidad para
+personas con discapacidad visual en entornos educativos.
 
-Sin embargo, el autor está abierto a permitir su uso en la mayoría de los casos, 
-SIEMPRE Y CUANDO se solicite y se obtenga una autorización expresa por escrito 
-antes de realizar cualquier acción.
+Por la presente, se establecen las siguientes condiciones de uso:
 
-Condiciones de uso y propiedad intelectual:
+1. USO PERMITIDO Y EDUCATIVO:
+   Se autoriza el uso, estudio y prueba de este software y sus esquemas de
+   hardware con fines educativos, de investigación, académicos o personales sin
+   ánimo de lucro, siempre que se conserve la atribución de autoría original a
+   favor de EloyGM (guiak.com) y se mantenga este aviso de licencia.
 
-1. SOLICITUD DE PERMISO: Para cualquier uso que implique la distribución del 
-   código, su modificación pública o su uso en proyectos ajenos, debe ponerse 
-   en contacto con el autor (EloyGM) y obtener su consentimiento explícito.
-2. USO COMERCIAL: Queda estrictamente prohibido cualquier uso comercial (vender 
-   el software, incluirlo en productos de pago o generar ingresos con él) sin 
-   una licencia comercial específica otorgada por el autor.
-3. AUTORÍA: Se debe mantener siempre el reconocimiento de la autoría original. 
-   Nadie puede hacer pasar este proyecto como propio.
+2. SOLICITUD DE AUTORIZACIÓN:
+   Cualquier distribución pública del código modificado, despliegue institucional
+   en centros o integración en proyectos de terceros requiere comunicación
+   previa y consentimiento por escrito del autor (EloyGM).
 
-EL SOFTWARE SE PROPORCIONA "TAL CUAL", SIN GARANTÍA DE NINGÚN TIPO, EXPRESA O 
-IMPLÍCITA. EN NINGÚN CASO EL AUTOR (ELOYGM) SERÁ RESPONSABLE DE NINGUNA 
-RECLAMACIÓN, DAÑO U OTRA RESPONSABILIDAD QUE SURJA DEL USO DE ESTE SOFTWARE.
+3. RESTRICCIÓN COMERCIAL:
+   Queda estrictamente prohibida la comercialización, venta, sublicenciamiento
+   o inclusión de este software o sus derivados en productos de pago o que generen
+   beneficio económico directo o indirecto, sin un acuerdo comercial específico
+   firmado expresamente por el autor.
 
+4. INTEGRIDAD DE AUTORÍA:
+   Bajo ninguna circunstancia se permite reclamar la autoría total o parcial de este
+   desarrollo ni eliminar las marcas identificativas del proyecto Guiak.
 
-===============================================================================
-ENGLISH
-===============================================================================
-Copyright (c) 2026 EloyGM. All rights reserved.
+5. EXENCIÓN DE GARANTÍA:
+   EL SOFTWARE SE ENTREGA 'TAL CUAL', SIN GARANTÍA DE NINGÚN TIPO, EXPRESA O
+   IMPLÍCITA, INCLUYENDO PERO SIN LIMITARSE A GARANTÍAS DE COMERCIABILIDAD,
+   IDONEIDAD PARA UN PROPÓSITO ESPECÍFICO O AUSENCIA DE ERRORES. EN NINGÚN CASO
+   EL AUTOR (ELOYGM) SERÁ RESPONSABLE DE NINGUNA RECLAMACIÓN, DAÑO O RESPONSABILIDAD
+   DERIVADA DEL USO O LA IMPOSIBILIDAD DE USO DE ESTE SOFTWARE.
 
-Permission is hereby NOT generally granted to any person to use this software 
-for commercial purposes, distribute it, sublicense it, sell copies, or claim 
-ownership of it.
+-------------------------------------------------------------------------------
+2. CATALÀ
+-------------------------------------------------------------------------------
+El projecte Guiak és un sistema de navegació assistida i accessibilitat per a
+persones amb discapacitat visual en entorns educatius.
 
-However, the author is willing to permit its use in most cases, PROVIDED THAT 
-express written permission is requested and granted prior to any usage.
+Per la present, s'estableixen les condicions d'ús següents:
 
-Terms of Use and Intellectual Property:
+1. ÚS PERMÈS I EDUCATIU:
+   S'autoritza l'ús, estudi i prova d'aquest programari i dels seus esquemes de
+   maquinari amb finalitats educatives, de recerca, acadèmiques o personals sense
+   ànim de lucre, sempre que es conservi l'atribució d'autoria original a favor
+   d'EloyGM (guiak.com) i es mantingui aquest avís de llicència.
 
-1. REQUESTING PERMISSION: For any use involving the distribution of the code, 
-   its public modification, or its integration into third-party projects, you 
-   must contact the author (EloyGM) and obtain explicit written consent.
-2. COMMERCIAL USE: Any commercial use (selling the software, including it in 
-   paid products, or generating revenue from it) is strictly prohibited without 
-   a specific commercial license granted by the author.
-3. ATTRIBUTION: Original authorship must always be acknowledged. No one may 
-   claim this project as their own.
+2. SOL·LICITUD D'AUTORITZACIÓ:
+   Qualsevol distribució pública del codi modificat, desplegament institucional en
+   centres o integració en projectes de tercers requereix comunicació prèvia i
+   consentiment per escrit de l'autor (EloyGM).
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED. IN NO EVENT SHALL THE AUTHOR (ELOYGM) BE LIABLE FOR ANY CLAIM, DAMAGES, 
-OR OTHER LIABILITY ARISING FROM THE USE OF THIS SOFTWARE.
+3. RESTRICCIÓ COMERCIAL:
+   Queda estrictament prohibida la comercialització, venda, subllicenciament o
+   inclusió d'aquest programari o dels seus derivats en productes de pagament o que
+   generin benefici econòmic directe o indirecte, sense un acord comercial específic
+   signat expressament per l'autor.
+
+4. INTEGRITAT D'AUTORIA:
+   En cap cas es permet reclamar l'autoria total o parcial d'aquest desenvolupament
+   ni eliminar les marques identificatives del projecte Guiak.
+
+5. EXEMPCIÓ DE GARANTIA:
+   EL PROGRAMARI S'ENTREGA 'TAL COM ÉS', SENSE GARANTIA DE CAP TIPUS, EXPRESSA O
+   IMPLÍCITA, INCLOENT PERÒ NO LIMITAT A GARANTIES DE COMERCIABILITAT, IDONEÏTAT
+   PER A UN PROPÒSIT DETERMINAT O ABSÈNCIA D'ERRORS. EN CAP CAS L'AUTOR (ELOYGM)
+   SERÀ RESPONSABLE DE CAP RECLAMACIÓ, DANY O RESPONSABILITAT DERIVADA DE L'ÚS O LA
+   IMPOSSIBILITAT D'ÚS D'AQUEST PROGRAMARI.

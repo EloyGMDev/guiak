@@ -68,6 +68,11 @@ struct NodeConfig {
   uint8_t  wifiEndHour;         // Hora de apagado vespertino (ej: 20 = 20:30)
   uint8_t  wifiEndMin;          // Minuto de apagado (ej: 30)
   bool     wifiScheduleEnabled; // True = respetar horario 07:00 - 20:30
+
+  // Parametros Firebase
+  char     firebaseHost[96];    // URL de Firebase Realtime Database
+  char     firebaseAuth[64];    // Auth token / secreto
+  bool     firebaseEnabled;     // True = sincronizar con Firebase
 };
 
 // ════════════════════════════════════════════════════════════════

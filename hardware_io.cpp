@@ -3,6 +3,7 @@
 #include "database.h"
 #include "audio_manager.h"
 #include "web_server.h"
+#include "firebase_client.h"
 #include <SPI.h>
 
 MFRC522 mfrc522(RFID_SS_PIN, RFID_RST_PIN);
@@ -76,6 +77,7 @@ void handleRFID() {
 
   // Respuesta acústica de confirmación
   playSuccessChime();
+  firebasePushLog("ACCESO", "Tarjeta UID: " + uid + " leida en aula " + String(nodeConfig.roomCode));
 
   mfrc522.PICC_HaltA();
   mfrc522.PCD_StopCrypto1();

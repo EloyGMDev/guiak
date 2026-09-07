@@ -22,6 +22,7 @@
 #include "ble_beacon.h"
 #include "hardware_io.h"
 #include "web_server.h"
+#include "firebase_client.h"
 
 static unsigned long lastBatteryCheck = 0;
 const unsigned long BATTERY_CHECK_INTERVAL = 30000; // Cada 30 segundos
@@ -71,7 +72,10 @@ void loop() {
   // 2. Gestionar servicio Wi-Fi y horario escolar (07:00 a 20:30)
   handleWifiService();
 
-  // 3. Escuchar tarjetas RFID de paso
+  // 3. Sincronizacion en tiempo real con Firebase
+  firebaseLoop();
+
+  // 4. Escuchar tarjetas RFID de paso
   handleRFID();
 
   // 4. Monitorización periódica del nivel de batería
@@ -82,6 +86,7 @@ void loop() {
 
     if (isBatteryLow()) {
       addLog("BATERIA", "AVISO: Bateria baja (" + String(batteryPercent) + "%)", LOG_WARN);
+      firebasePushLog("BATERIA", "AVISO: Bateria baja (" + String(batteryPercent) + "%)", LOG_WARN);
     }
   }
 
