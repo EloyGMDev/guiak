@@ -1,76 +1,115 @@
 ===============================================================================
-LICENCIA DE SOFTWARE GUIAK (guiak.com)
+SOFTWARE LICENSE / LLICENCIA DE SOFTWARE / LICENCIA DE SOFTWARE
+GUIAK (guiak.com)
 ===============================================================================
-Copyright (c) 2026 EloyGM. Todos los derechos reservados.
+Copyright (c) 2026 EloyGM. All rights reserved / Tots els drets reservats / Todos los derechos reservados.
 
 -------------------------------------------------------------------------------
-1. ESPAÑOL / CASTELLANO
+1. ENGLISH
 -------------------------------------------------------------------------------
-El proyecto Guiak es un sistema de navegación asistida y accesibilidad para
+The Guiak project is an assistive indoor navigation and accessibility system
+designed for visually impaired individuals in educational environments.
+
+Permission is hereby granted under the following conditions:
+
+1. PERMITTED AND EDUCATIONAL USE:
+   Use, study, testing, and research of this software and its hardware designs
+   are authorized for educational, academic, non-profit, or personal purposes,
+   provided that original authorship attribution to EloyGM (guiak.com) is
+   preserved and this license notice is included in all copies or substantial
+   portions of the software.
+
+2. AUTHORIZATION REQUEST:
+   Any public distribution of modified source code, institutional deployment
+   in organizations or schools, or integration into third-party projects requires
+   prior notice and written consent from the author (EloyGM).
+
+3. COMMERCIAL RESTRICTIONS:
+   Commercial exploitation, sale, sublicensing, or inclusion of this software
+   or its derivatives in paid products or revenue-generating activities is
+   strictly prohibited without an express commercial license agreement signed
+   by the author.
+
+4. AUTHORSHIP INTEGRITY:
+   Under no circumstances is it permitted to claim total or partial authorship
+   of this software or remove identifying branding of the Guiak project.
+
+5. DISCLAIMER OF WARRANTY:
+   THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHOR (ELOYGM) BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING
+   FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+   IN THE SOFTWARE.
+
+-------------------------------------------------------------------------------
+2. ESPAÑOL / CASTELLANO
+-------------------------------------------------------------------------------
+El proyecto Guiak es un sistema de navegacion asistida y accesibilidad para
 personas con discapacidad visual en entornos educativos.
 
 Por la presente, se establecen las siguientes condiciones de uso:
 
 1. USO PERMITIDO Y EDUCATIVO:
    Se autoriza el uso, estudio y prueba de este software y sus esquemas de
-   hardware con fines educativos, de investigación, académicos o personales sin
-   ánimo de lucro, siempre que se conserve la atribución de autoría original a
+   hardware con fines educativos, de investigacion, academicos o personales sin
+   animo de lucro, siempre que se conserve la atribucion de autoria original a
    favor de EloyGM (guiak.com) y se mantenga este aviso de licencia.
 
-2. SOLICITUD DE AUTORIZACIÓN:
-   Cualquier distribución pública del código modificado, despliegue institucional
-   en centros o integración en proyectos de terceros requiere comunicación
+2. SOLICITUD DE AUTORIZACION:
+   Cualquier distribucion publica del codigo modificado, despliegue institucional
+   en centros o integracion en proyectos de terceros requiere comunicacion
    previa y consentimiento por escrito del autor (EloyGM).
 
-3. RESTRICCIÓN COMERCIAL:
-   Queda estrictamente prohibida la comercialización, venta, sublicenciamiento
-   o inclusión de este software o sus derivados en productos de pago o que generen
-   beneficio económico directo o indirecto, sin un acuerdo comercial específico
+3. RESTRICCION COMERCIAL:
+   Queda estrictamente prohibida la comercializacion, venta, sublicenciamiento
+   o inclusion de este software o sus derivados en productos de pago o que generen
+   beneficio economico directo o indirecto, sin un acuerdo comercial especifico
    firmado expresamente por el autor.
 
-4. INTEGRIDAD DE AUTORÍA:
-   Bajo ninguna circunstancia se permite reclamar la autoría total o parcial de este
+4. INTEGRIDAD DE AUTORIA:
+   Bajo ninguna circunstancia se permite reclamar la autoria total o parcial de este
    desarrollo ni eliminar las marcas identificativas del proyecto Guiak.
 
-5. EXENCIÓN DE GARANTÍA:
-   EL SOFTWARE SE ENTREGA 'TAL CUAL', SIN GARANTÍA DE NINGÚN TIPO, EXPRESA O
-   IMPLÍCITA, INCLUYENDO PERO SIN LIMITARSE A GARANTÍAS DE COMERCIABILIDAD,
-   IDONEIDAD PARA UN PROPÓSITO ESPECÍFICO O AUSENCIA DE ERRORES. EN NINGÚN CASO
-   EL AUTOR (ELOYGM) SERÁ RESPONSABLE DE NINGUNA RECLAMACIÓN, DAÑO O RESPONSABILIDAD
+5. EXENCION DE GARANTIA:
+   EL SOFTWARE SE ENTREGA 'TAL CUAL', SIN GARANTIA DE NINGUN TIPO, EXPRESA O
+   IMPLICITA, INCLUYENDO PERO SIN LIMITARSE A GARANTIAS DE COMERCIABILIDAD,
+   IDONEIDAD PARA UN PROPOSITO ESPECIFICO O AUSENCIA DE ERRORES. EN NINGUN CASO
+   EL AUTOR (ELOYGM) SERA RESPONSABLE DE NINGUNA RECLAMACION, DANO O RESPONSABILIDAD
    DERIVADA DEL USO O LA IMPOSIBILIDAD DE USO DE ESTE SOFTWARE.
 
 -------------------------------------------------------------------------------
-2. CATALÀ
+3. CATALA
 -------------------------------------------------------------------------------
-El projecte Guiak és un sistema de navegació assistida i accessibilitat per a
+El projecte Guiak es un sistema de navegacio assistida i accessibilitat per a
 persones amb discapacitat visual en entorns educatius.
 
-Per la present, s'estableixen les condicions d'ús següents:
+Per la present, s estableixen les condicions d us seguents:
 
-1. ÚS PERMÈS I EDUCATIU:
-   S'autoritza l'ús, estudi i prova d'aquest programari i dels seus esquemes de
-   maquinari amb finalitats educatives, de recerca, acadèmiques o personals sense
-   ànim de lucre, sempre que es conservi l'atribució d'autoria original a favor
-   d'EloyGM (guiak.com) i es mantingui aquest avís de llicència.
+1. US PERMES I EDUCATIU:
+   S autoritza l us, estudi i prova d aquest programari i dels seus esquemes de
+   maquinari amb finalitats educatives, de recerca, academiques o personals sense
+   anim de lucre, sempre que es conservi l atribucio d autoria original a favor
+   d EloyGM (guiak.com) i es mantingui aquest avis de llicencia.
 
-2. SOL·LICITUD D'AUTORITZACIÓ:
-   Qualsevol distribució pública del codi modificat, desplegament institucional en
-   centres o integració en projectes de tercers requereix comunicació prèvia i
-   consentiment per escrit de l'autor (EloyGM).
+2. SOLLICITUD D AUTORITZACIO:
+   Qualsevol distribucio publica del codi modificat, desplegament institucional en
+   centres o integracio en projectes de tercers requereix comunicacio previa i
+   consentiment per escrit de l autor (EloyGM).
 
-3. RESTRICCIÓ COMERCIAL:
-   Queda estrictament prohibida la comercialització, venda, subllicenciament o
-   inclusió d'aquest programari o dels seus derivats en productes de pagament o que
-   generin benefici econòmic directe o indirecte, sense un acord comercial específic
-   signat expressament per l'autor.
+3. RESTRICCIO COMERCIAL:
+   Queda estrictament prohibida la comercialitzacio, venda, subllicenciament o
+   inclusio d aquest programari o dels seus derivats en productes de pagament o que
+   generin benefici economic directe o indirecte, sense un acord comercial especific
+   signat expressament per l autor.
 
-4. INTEGRITAT D'AUTORIA:
-   En cap cas es permet reclamar l'autoria total o parcial d'aquest desenvolupament
+4. INTEGRITAT D AUTORIA:
+   En cap cas es permet reclamar l autoria total o parcial d aquest desenvolupament
    ni eliminar les marques identificatives del projecte Guiak.
 
-5. EXEMPCIÓ DE GARANTIA:
-   EL PROGRAMARI S'ENTREGA 'TAL COM ÉS', SENSE GARANTIA DE CAP TIPUS, EXPRESSA O
-   IMPLÍCITA, INCLOENT PERÒ NO LIMITAT A GARANTIES DE COMERCIABILITAT, IDONEÏTAT
-   PER A UN PROPÒSIT DETERMINAT O ABSÈNCIA D'ERRORS. EN CAP CAS L'AUTOR (ELOYGM)
-   SERÀ RESPONSABLE DE CAP RECLAMACIÓ, DANY O RESPONSABILITAT DERIVADA DE L'ÚS O LA
-   IMPOSSIBILITAT D'ÚS D'AQUEST PROGRAMARI.
+5. EXEMPCIO DE GARANTIA:
+   EL PROGRAMARI S ENTREGA 'TAL COM ES', SENSE GARANTIA DE CAP TIPUS, EXPRESSA O
+   IMPLICITA, INCLOENT PERO NO LIMITAT A GARANTIES DE COMERCIABILITAT, IDONEITAT
+   PER A UN PROPOSIT DETERMINAT O ABSENCIA D ERRORS. EN CAP CAS L AUTOR (ELOYGM)
+   SERA RESPONSABLE DE CAP RECLAMACIO, DANY O RESPONSABILITAT DERIVADA DE L US O LA
+   IMPOSSIBILITAT D US D AQUEST PROGRAMARI.
