@@ -1,5 +1,9 @@
 <div align="center">
 
+<p align="center">
+  <img src="logo.png" alt="Guiak" width="360" />
+</p>
+
 # Guiak
 ### *Assistive Indoor Beacon & Navigation Ecosystem for Educational Institutions*
 **[guiak.com](https://guiak.com)**
