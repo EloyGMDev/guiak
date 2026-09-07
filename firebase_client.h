@@ -18,6 +18,9 @@ void firebaseCheckCommands();
 // Envía un evento a Firebase (si no hay Wi-Fi, lo encola en memoria offline)
 void firebasePushLog(const String& tag, const String& message, uint8_t level = 1);
 
+// Registra la presencia y última ubicación de un estudiante (vía BLE de proximidad o tarjeta RFID)
+void firebaseRecordStudentPresence(const String& studentId, const String& method, int rssi = 0);
+
 // Vacía los eventos pendientes acumulados durante caídas de Wi-Fi
 void firebaseFlushOfflineQueue();
 

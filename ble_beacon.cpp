@@ -13,6 +13,7 @@
 #define GUIAK_SERVICE_UUID        "0000FD00-0000-1000-8000-00805F9B34FB"
 #define CHAR_TRIGGER_UUID        "0000FD01-0000-1000-8000-00805F9B34FB"
 #define CHAR_INFO_UUID           "0000FD02-0000-1000-8000-00805F9B34FB"
+#define CHAR_PRESENCE_UUID       "0000FD03-0000-1000-8000-00805F9B34FB"
 
 // Servicio Estándar de Batería Bluetooth SIG
 #define BATTERY_SERVICE_UUID     "0000180F-0000-1000-8000-00805F9B34FB"
@@ -21,6 +22,7 @@
 static BLEServer* pServer = nullptr;
 static BLECharacteristic* pTriggerChar = nullptr;
 static BLECharacteristic* pInfoChar = nullptr;
+static BLECharacteristic* pPresenceChar = nullptr;
 static BLECharacteristic* pBatteryChar = nullptr;
 static BLEAdvertising* pAdvertising = nullptr;
 static bool deviceConnected = false;
@@ -39,6 +41,19 @@ class GuiakServerCallbacks : public BLEServerCallbacks {
   }
 };
 
+class PresenceCallbacks : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic* pCharacteristic) {
+    std::string val = pCharacteristic->getValue();
+    if (val.length() > 0) {
+      String studentId = String(val.c_str());
+      studentId.trim();
+      if (studentId.length() > 0) {
+        firebaseRecordStudentPresence(studentId, "BLE", -60);
+      }
+    }
+  }
+};
+
 // Callback para activación de sonido bajo demanda desde la app móvil
 class TriggerCallbacks : public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic* pCharacteristic) {
@@ -49,6 +64,11 @@ class TriggerCallbacks : public BLECharacteristicCallbacks {
         // Disparo de baliza acústica estándar
         playAcousticBeacon();
         firebasePushLog("AUDIO", "Baliza acustica activada por la app movil");
+        // Si la app móvil envía el ID de la alumna tras el comando (ej: 1:alumna_01)
+        if (val.length() > 2 && val[1] == ':') {
+          String stdId = String(val.substr(2).c_str());
+          firebaseRecordStudentPresence(stdId, "BLE", -55);
+        }
       } else if (cmd == 2 || cmd == '2') {
         // Disparo de confirmación de llegada
         playArrivalChime();
@@ -77,6 +97,13 @@ void bleBeaconInit() {
     BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_WRITE_NR
   );
   pTriggerChar->setCallbacks(new TriggerCallbacks());
+
+  // Característica "Student Presence" (Envío de presencia de la app del alumno por proximidad)
+  pPresenceChar = pSonaService->createCharacteristic(
+    CHAR_PRESENCE_UUID,
+    BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_WRITE_NR
+  );
+  pPresenceChar->setCallbacks(new PresenceCallbacks());
 
   // Característica "Room Info" (Lectura de metadatos)
   pInfoChar = pSonaService->createCharacteristic(

@@ -8,11 +8,17 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
+#include <time.h>
 
 static unsigned long lastSyncCheck = 0;
 static unsigned long lastCommandCheck = 0;
 const unsigned long SYNC_INTERVAL_MS    = 30000; // Sincronizar config cada 30s
 const unsigned long COMMAND_INTERVAL_MS = 5000;  // Comprobar ordenes cada 5s
+
+// Filtro anti-spam de presencia (evita saturar la red si el estudiante se queda quieto delante)
+static String lastPresenceStudent = "";
+static unsigned long lastPresenceTime = 0;
+const unsigned long PRESENCE_COOLDOWN_MS = 15000; // 15 segundos entre actualizaciones del mismo alumno
 
 // ── COLA CIRCULAR OFFLINE ──────────────────────
 static QueuedEvent offlineQueue[OFFLINE_QUEUE_SIZE];
@@ -22,7 +28,6 @@ static int queueCount = 0;
 
 static void enqueueOfflineLog(const String& tag, const String& msg, uint8_t level) {
   if (queueCount >= OFFLINE_QUEUE_SIZE) {
-    // Sobrescribir el evento más antiguo si la cola se llena
     queueTail = (queueTail + 1) % OFFLINE_QUEUE_SIZE;
     queueCount--;
   }
@@ -58,7 +63,6 @@ void firebasePushLog(const String& tag, const String& message, uint8_t level) {
   if (!nodeConfig.firebaseEnabled) return;
 
   if (WiFi.status() != WL_CONNECTED) {
-    // Si no hay Wi-Fi, encolar en memoria offline para no perder el registro
     enqueueOfflineLog(tag, message, level);
     return;
   }
@@ -79,17 +83,93 @@ void firebasePushLog(const String& tag, const String& message, uint8_t level) {
     else if (level == LOG_ERROR) lvlStr = "ERROR";
 
     String payload = "{";
-    payload += ""node":"" + String(nodeConfig.roomCode) + "",";
-    payload += ""tag":"" + tag + "",";
-    payload += ""msg":"" + message + "",";
-    payload += ""lvl":"" + String(lvlStr) + "",";
-    payload += ""bat":" + String(batteryPercent) + ",";
-    payload += ""uptime":" + String(millis() / 1000);
+    payload += "\"node\":\"" + String(nodeConfig.roomCode) + "\",";
+    payload += "\"tag\":\"" + tag + "\",";
+    payload += "\"msg\":\"" + message + "\",";
+    payload += "\"lvl\":\"" + String(lvlStr) + "\",";
+    payload += "\"bat\":" + String(batteryPercent) + ",";
+    payload += "\"uptime\":" + String(millis() / 1000);
     payload += "}";
 
     https.POST(payload);
     https.end();
   }
+}
+
+void firebaseRecordStudentPresence(const String& studentId, const String& method, int rssi) {
+  if (!nodeConfig.firebaseEnabled) return;
+
+  String cleanId = studentId;
+  cleanId.trim();
+  cleanId.replace(" ", "_");
+  cleanId.replace("/", "_");
+  cleanId.replace(".", "_");
+  if (cleanId.length() == 0) return;
+
+  // Evitar sobrecarga en Firebase si el móvil o tarjeta sigue cerca de la puerta
+  if (cleanId == lastPresenceStudent && (millis() - lastPresenceTime < PRESENCE_COOLDOWN_MS)) {
+    return;
+  }
+  lastPresenceStudent = cleanId;
+  lastPresenceTime = millis();
+
+  time_t now = 0;
+  time(&now);
+  unsigned long timestamp = (now > 1000000) ? (unsigned long)now : (millis() / 1000);
+
+  addLog("PRESENCIA", "Estudiante detectado [" + method + "]: " + cleanId + " en " + String(nodeConfig.roomCode), LOG_INFO);
+
+  if (WiFi.status() != WL_CONNECTED) {
+    enqueueOfflineLog("PRESENCE", cleanId + "|" + method + "|" + String(nodeConfig.roomCode), LOG_INFO);
+    return;
+  }
+
+  WiFiClientSecure client;
+  client.setInsecure();
+  HTTPClient https;
+
+  // 1. Actualizar ficha del estudiante: /students/{cleanId}/lastSeen.json
+  String studentPath = "/students/" + cleanId + "/lastSeen";
+  String studentUrl  = buildUrl(studentPath);
+
+  if (https.begin(client, studentUrl)) {
+    https.addHeader("Content-Type", "application/json");
+
+    String payload = "{";
+    payload += "\"studentId\":\"" + cleanId + "\",";
+    payload += "\"roomCode\":\"" + String(nodeConfig.roomCode) + "\",";
+    payload += "\"roomName\":\"" + String(nodeConfig.roomName) + "\",";
+    payload += "\"floor\":" + String(nodeConfig.floor) + ",";
+    payload += "\"building\":\"" + String(nodeConfig.building) + "\",";
+    payload += "\"timestamp\":" + String(timestamp) + ",";
+    payload += "\"method\":\"" + method + "\",";
+    payload += "\"rssi\":" + String(rssi);
+    payload += "}";
+
+    https.PATCH(payload);
+    https.end();
+  }
+
+  // 2. Actualizar registro local del aula: /nodes/{roomCode}/presence/{cleanId}.json
+  String roomPath = "/nodes/" + String(nodeConfig.roomCode) + "/presence/" + cleanId;
+  String roomUrl  = buildUrl(roomPath);
+
+  if (https.begin(client, roomUrl)) {
+    https.addHeader("Content-Type", "application/json");
+
+    String payload = "{";
+    payload += "\"studentId\":\"" + cleanId + "\",";
+    payload += "\"timestamp\":" + String(timestamp) + ",";
+    payload += "\"method\":\"" + method + "\",";
+    payload += "\"rssi\":" + String(rssi);
+    payload += "}";
+
+    https.PATCH(payload);
+    https.end();
+  }
+
+  // 3. Registrar el evento en el histórico del aula
+  firebasePushLog("PRESENCIA", "Estudiante " + cleanId + " registrado mediante " + method, LOG_INFO);
 }
 
 void firebaseFlushOfflineQueue() {
@@ -121,14 +201,14 @@ void firebaseUpdateStatus() {
     https.addHeader("Content-Type", "application/json");
 
     String payload = "{";
-    payload += ""online":true,";
-    payload += ""roomName":"" + String(nodeConfig.roomName) + "",";
-    payload += ""floor":" + String(nodeConfig.floor) + ",";
-    payload += ""battery":" + String(batteryPercent) + ",";
-    payload += ""mv":" + String(batteryMillivolts) + ",";
-    payload += ""rssi":" + String(WiFi.RSSI()) + ",";
-    payload += ""lockdown":" + String(lockdownMode ? "true" : "false") + ",";
-    payload += ""uptime":" + String(millis() / 1000);
+    payload += "\"online\":true,";
+    payload += "\"roomName\":\"" + String(nodeConfig.roomName) + "\",";
+    payload += "\"floor\":" + String(nodeConfig.floor) + ",";
+    payload += "\"battery\":" + String(batteryPercent) + ",";
+    payload += "\"mv\":" + String(batteryMillivolts) + ",";
+    payload += "\"rssi\":" + String(WiFi.RSSI()) + ",";
+    payload += "\"lockdown\":" + String(lockdownMode ? "true" : "false") + ",";
+    payload += "\"uptime\":" + String(millis() / 1000);
     payload += "}";
 
     https.PATCH(payload);
@@ -219,7 +299,7 @@ void firebaseCheckCommands() {
     if (code == 200) {
       String cmd = https.getString();
       cmd.trim();
-      cmd.replace(""", ""); // Quitar comillas del string JSON
+      cmd.replace("\"", "");
 
       if (cmd.length() > 0 && cmd != "null" && cmd != "idle") {
         addLog("COMANDO", "Orden remota recibida: " + cmd, LOG_WARN);
@@ -241,8 +321,7 @@ void firebaseCheckCommands() {
           ESP.restart();
         }
 
-        // Limpiar el comando en Firebase para no re-ejecutarlo
-        https.PUT(""idle"");
+        https.PUT("\"idle\"");
       }
     }
     https.end();
@@ -254,7 +333,7 @@ void firebaseLoop() {
     return;
   }
 
-  // 1. Si hay eventos acumulados en la cola offline, volcarlos primero
+  // 1. Volcar eventos pendientes offline
   if (queueCount > 0) {
     firebaseFlushOfflineQueue();
   }

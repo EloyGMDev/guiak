@@ -91,6 +91,9 @@ void handleRFID() {
   playSuccessChime();
   firebasePushLog("ACCESO", "Tarjeta UID: " + uid + " leida en aula " + String(nodeConfig.roomCode));
 
+  // Registrar presencia de estudiante/docente en Firebase
+  firebaseRecordStudentPresence(uid, "RFID", 0);
+
   mfrc522.PICC_HaltA();
   mfrc522.PCD_StopCrypto1();
 }

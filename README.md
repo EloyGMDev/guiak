@@ -47,6 +47,7 @@ By offloading device management, schedules, and logging directly to **Firebase R
 
 ### 2. Key Capabilities
 - **Dual-Platform Hardware Abstraction:** Unified codebase with automated compile-time HAL for either **ESP32-S3** (battery powered with I2S digital audio) or **Arduino UNO R4 WiFi** (mains or external battery with 12-bit DAC / buzzer).
+- **Student Proximity & Presence Tracking:** Real-time location telemetry registering the last classroom doorway where visually impaired students were detected (via hands-free BLE proximity or physical RFID badge tap).
 - **Firebase Real-Time Cloud Synchronization:** Room names, floor assignments, acoustic volumes, and schedules update dynamically without re-flashing nodes.
 - **Offline Resilience Event Buffer:** If institutional Wi-Fi drops, RFID card reads and navigation logs are preserved in an in-memory circular buffer and automatically flushed to Firebase once network connectivity returns.
 - **Remote Cloud Command Dispatcher:** Facility administrators can trigger sound pulses remotely, toggle school-wide safety lockdowns, or query node telemetry directly from the Firebase console.
@@ -91,11 +92,15 @@ By offloading device management, schedules, and logging directly to **Firebase R
 ### 4. Firebase Cloud Architecture
 
 ```json
-/nodes/{roomCode}/
-  ├── config.json       <-- Classroom name, floor, volume, schedule
-  ├── status.json       <-- Heartbeat, battery %, mV, Wi-Fi RSSI, uptime
-  ├── command.json      <-- Cloud dispatcher (remote ping, lockdown toggle)
-  └── logs/             <-- Timestamped event logs (RFID badges, wayfinding triggers)
+/
+├── nodes/{roomCode}/
+│     ├── config.json         <-- Classroom name, floor, volume, operational schedule
+│     ├── status.json         <-- Heartbeat, battery %, mV, Wi-Fi RSSI, uptime
+│     ├── command.json        <-- Cloud dispatcher (remote chime, lockdown mode)
+│     ├── presence/{student}  <-- Students currently in range of this doorway
+│     └── logs/               <-- Event audit trail (RFID taps, wayfinding pulses)
+└── students/{studentId}/
+      └── lastSeen.json       <-- Last detected room, floor, timestamp, and method (BLE/RFID)
 ```
 
 </details>
@@ -115,6 +120,7 @@ Al centralizar la gestion, los horarios y los registros en **Firebase Realtime D
 
 ### 2. Capacidades Principales
 - **Soporte Dual de Plataformas:** Mismo codigo fuente con capa de abstraccion HAL para compilar en **ESP32-S3** (modo ultra-bajo consumo con amplificador I2S) o en **Arduino UNO R4 WiFi** (salida analogica DAC de 12 bits / zumbador).
+- **Registro y Seguimiento de Presencia de Alumnado:** Telemetria en tiempo real de la ultima aula donde estuvo cerca la alumna (tanto en modo manos libres por proximidad BLE como mediante confirmacion por tarjeta RFID).
 - **Sincronizacion en Tiempo Real con Firebase:** Aulas, plantas, niveles de volumen y horarios se configuran de forma centralizada en la nube y se aplican en caliente sin reprogramar los nodos.
 - **Cola de Eventos Fuera de Linea (Buffer Offline):** Si la red Wi-Fi escolar se interrumpe temporalmente, los fichajes RFID y las activaciones acusticas se conservan en un buffer circular en memoria y se transmiten automaticamente a Firebase al recuperar la conexion.
 - **Despachador Remoto de Ordenes:** El equipo directivo puede activar la baliza acustica a distancia, activar el modo de confinamiento escolar de emergencia (lockdown) o consultar la telemetria en tiempo real desde Firebase.
@@ -133,7 +139,9 @@ Al centralizar la gestion, los horarios y los registros en **Firebase Realtime D
 - `/nodes/{roomCode}/config.json`: Configuracion remota (nombre del aula, planta, volumen y horario).
 - `/nodes/{roomCode}/status.json`: Telemetria en vivo (latido, porcentaje de bateria, RSSI Wi-Fi y tiempo activo).
 - `/nodes/{roomCode}/command.json`: Recepcion de comandos remotos (hacer sonar la baliza, activar confinamiento).
+- `/nodes/{roomCode}/presence/{studentId}.json`: Registro de estudiantes detectados en el aula.
 - `/nodes/{roomCode}/logs/`: Historico cronologico de accesos RFID y eventos de navegacion.
+- `/students/{studentId}/lastSeen.json`: Ultima aula detectada para el alumno, planta, fecha/hora y metodo (BLE/RFID).
 
 </details>
 
@@ -152,6 +160,7 @@ En centralitzar la gestio, els horaris i els registres a **Firebase Realtime Dat
 
 ### 2. Capacitats Principals
 - **Suport Dual de Plataformes:** El mateix codi font pot compilar-se tant en **ESP32-S3** com en **Arduino UNO R4 WiFi**.
+- **Seguiment i Presencia de l Alumnat:** Telemetria en temps real de l ultima aula on s ha detectat l alumna (mitjancant mans lliures BLE o amb targeta RFID).
 - **Sincronitzacio en Temps Real amb Firebase:** Les aules, horaris, volum i parametres es configuren al nuvol i s apliquen a l instant.
 - **Cua d Esdeveniments Fora de Linia (Buffer Offline):** Si el Wi-Fi cau, els accessos RFID es guarden a la memoria local i es transmeten automaticament a Firebase en recuperar la connexio.
 - **Despatxador Remot d Ordres:** Possibilitat d activar el so de l aula a distancia o ordenar un tancament d emergencia des de la consola central.
@@ -170,7 +179,9 @@ En centralitzar la gestio, els horaris i els registres a **Firebase Realtime Dat
 - `/nodes/{roomCode}/config.json`: Configuracio remota de l aula, planta i volum.
 - `/nodes/{roomCode}/status.json`: Estat en viu, bateria restant, RSSI Wi-Fi i temps en funcionament.
 - `/nodes/{roomCode}/command.json`: Recepcio d ordres remotes (activacio acustica, mode confinament).
+- `/nodes/{roomCode}/presence/{studentId}.json`: Estudiants detectats a l aula.
 - `/nodes/{roomCode}/logs/`: Registre cronologic d accessos RFID i balises de navegacio.
+- `/students/{studentId}/lastSeen.json`: Ultima aula detectada per a l alumne, planta, data/hora i metode (BLE/RFID).
 
 </details>
 
