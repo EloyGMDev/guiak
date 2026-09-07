@@ -11,3 +11,4 @@ unsigned long manualOverrideStart = 0;
 uint8_t batteryPercent = 100;
 uint16_t batteryMillivolts = 4100;
 bool isSoundPlaying = false;
+bool lockdownMode = false;

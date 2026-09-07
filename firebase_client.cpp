@@ -1,6 +1,7 @@
 #include "firebase_client.h"
 #include "config.h"
 #include "database.h"
+#include "audio_manager.h"
 #include "power_manager.h"
 #include "utils.h"
 
@@ -9,11 +10,29 @@
 #include <HTTPClient.h>
 
 static unsigned long lastSyncCheck = 0;
-const unsigned long SYNC_CHECK_INTERVAL = 30000; // Comprobar cambios cada 30 segundos
-static bool isSyncing = false;
+static unsigned long lastCommandCheck = 0;
+const unsigned long SYNC_INTERVAL_MS    = 30000; // Sincronizar config cada 30s
+const unsigned long COMMAND_INTERVAL_MS = 5000;  // Comprobar ordenes cada 5s
 
-void firebaseInit() {
-  addLog("FIREBASE", "Cliente Firebase inicializado para: " + String(nodeConfig.firebaseHost));
+// ── COLA CIRCULAR OFFLINE ──────────────────────
+static QueuedEvent offlineQueue[OFFLINE_QUEUE_SIZE];
+static int queueHead  = 0;
+static int queueTail  = 0;
+static int queueCount = 0;
+
+static void enqueueOfflineLog(const String& tag, const String& msg, uint8_t level) {
+  if (queueCount >= OFFLINE_QUEUE_SIZE) {
+    // Sobrescribir el evento más antiguo si la cola se llena
+    queueTail = (queueTail + 1) % OFFLINE_QUEUE_SIZE;
+    queueCount--;
+  }
+  strncpy(offlineQueue[queueHead].tag, tag.c_str(), sizeof(offlineQueue[queueHead].tag) - 1);
+  strncpy(offlineQueue[queueHead].msg, msg.c_str(), sizeof(offlineQueue[queueHead].msg) - 1);
+  offlineQueue[queueHead].level = level;
+  offlineQueue[queueHead].timestamp = millis() / 1000;
+
+  queueHead = (queueHead + 1) % OFFLINE_QUEUE_SIZE;
+  queueCount++;
 }
 
 static String buildUrl(const String& path) {
@@ -31,13 +50,21 @@ static String buildUrl(const String& path) {
   return url;
 }
 
+void firebaseInit() {
+  addLog("FIREBASE", "Cliente Firebase inicializado: " + String(nodeConfig.firebaseHost));
+}
+
 void firebasePushLog(const String& tag, const String& message, uint8_t level) {
-  if (!nodeConfig.firebaseEnabled || WiFi.status() != WL_CONNECTED) {
+  if (!nodeConfig.firebaseEnabled) return;
+
+  if (WiFi.status() != WL_CONNECTED) {
+    // Si no hay Wi-Fi, encolar en memoria offline para no perder el registro
+    enqueueOfflineLog(tag, message, level);
     return;
   }
 
   WiFiClientSecure client;
-  client.setInsecure(); // No validar cadena de certificados SSL para conexion directa ligera
+  client.setInsecure();
   HTTPClient https;
 
   String path = "/nodes/" + String(nodeConfig.roomCode) + "/logs";
@@ -60,15 +87,28 @@ void firebasePushLog(const String& tag, const String& message, uint8_t level) {
     payload += ""uptime":" + String(millis() / 1000);
     payload += "}";
 
-    int code = https.POST(payload);
+    https.POST(payload);
     https.end();
   }
 }
 
-void firebaseUpdateStatus() {
-  if (!nodeConfig.firebaseEnabled || WiFi.status() != WL_CONNECTED) {
-    return;
+void firebaseFlushOfflineQueue() {
+  if (queueCount == 0 || WiFi.status() != WL_CONNECTED) return;
+
+  addLog("FIREBASE", "Volcando " + String(queueCount) + " eventos acumulados offline...", LOG_INFO);
+
+  while (queueCount > 0) {
+    QueuedEvent ev = offlineQueue[queueTail];
+    queueTail = (queueTail + 1) % OFFLINE_QUEUE_SIZE;
+    queueCount--;
+
+    firebasePushLog(String(ev.tag) + "_OFFLINE", String(ev.msg), ev.level);
+    delay(50);
   }
+}
+
+void firebaseUpdateStatus() {
+  if (!nodeConfig.firebaseEnabled || WiFi.status() != WL_CONNECTED) return;
 
   WiFiClientSecure client;
   client.setInsecure();
@@ -87,6 +127,7 @@ void firebaseUpdateStatus() {
     payload += ""battery":" + String(batteryPercent) + ",";
     payload += ""mv":" + String(batteryMillivolts) + ",";
     payload += ""rssi":" + String(WiFi.RSSI()) + ",";
+    payload += ""lockdown":" + String(lockdownMode ? "true" : "false") + ",";
     payload += ""uptime":" + String(millis() / 1000);
     payload += "}";
 
@@ -96,11 +137,8 @@ void firebaseUpdateStatus() {
 }
 
 void firebaseSyncConfig() {
-  if (!nodeConfig.firebaseEnabled || WiFi.status() != WL_CONNECTED || isSyncing) {
-    return;
-  }
+  if (!nodeConfig.firebaseEnabled || WiFi.status() != WL_CONNECTED) return;
 
-  isSyncing = true;
   WiFiClientSecure client;
   client.setInsecure();
   HTTPClient https;
@@ -164,7 +202,51 @@ void firebaseSyncConfig() {
     }
     https.end();
   }
-  isSyncing = false;
+}
+
+void firebaseCheckCommands() {
+  if (!nodeConfig.firebaseEnabled || WiFi.status() != WL_CONNECTED) return;
+
+  WiFiClientSecure client;
+  client.setInsecure();
+  HTTPClient https;
+
+  String path = "/nodes/" + String(nodeConfig.roomCode) + "/command";
+  String url = buildUrl(path);
+
+  if (https.begin(client, url)) {
+    int code = https.GET();
+    if (code == 200) {
+      String cmd = https.getString();
+      cmd.trim();
+      cmd.replace(""", ""); // Quitar comillas del string JSON
+
+      if (cmd.length() > 0 && cmd != "null" && cmd != "idle") {
+        addLog("COMANDO", "Orden remota recibida: " + cmd, LOG_WARN);
+
+        if (cmd == "trigger_sound" || cmd == "sound") {
+          playAcousticBeacon();
+          firebasePushLog("COMANDO", "Baliza acustica ejecutada por orden remota");
+        } else if (cmd == "lockdown_on") {
+          lockdownMode = true;
+          playWarningChime();
+          firebasePushLog("SEGURIDAD", "Bloqueo de emergencia (Lockdown) ACTIVADO", LOG_WARN);
+        } else if (cmd == "lockdown_off") {
+          lockdownMode = false;
+          playSuccessChime();
+          firebasePushLog("SEGURIDAD", "Bloqueo de emergencia DESACTIVADO", LOG_INFO);
+        } else if (cmd == "reboot") {
+          firebasePushLog("SISTEMA", "Reinicio remoto solicitado");
+          delay(500);
+          ESP.restart();
+        }
+
+        // Limpiar el comando en Firebase para no re-ejecutarlo
+        https.PUT(""idle"");
+      }
+    }
+    https.end();
+  }
 }
 
 void firebaseLoop() {
@@ -172,7 +254,19 @@ void firebaseLoop() {
     return;
   }
 
-  if (millis() - lastSyncCheck > SYNC_CHECK_INTERVAL) {
+  // 1. Si hay eventos acumulados en la cola offline, volcarlos primero
+  if (queueCount > 0) {
+    firebaseFlushOfflineQueue();
+  }
+
+  // 2. Comprobar ordenes remotas cada 5s
+  if (millis() - lastCommandCheck > COMMAND_INTERVAL_MS) {
+    lastCommandCheck = millis();
+    firebaseCheckCommands();
+  }
+
+  // 3. Comprobar actualizacion de configuracion y estado cada 30s
+  if (millis() - lastSyncCheck > SYNC_INTERVAL_MS) {
     lastSyncCheck = millis();
     firebaseSyncConfig();
     firebaseUpdateStatus();

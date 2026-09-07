@@ -1,5 +1,30 @@
 #include "audio_manager.h"
 #include "config.h"
+
+#if defined(ARDUINO_UNOR4_WIFI)
+// ════════════════════════════════════════════════════════════════
+//  AUDIO PARA ARDUINO UNO R4 WIFI (Buzzer / DAC A0)
+// ════════════════════════════════════════════════════════════════
+void audioInit() {
+  pinMode(BUZZER_PIN, OUTPUT);
+}
+
+void audioPowerDown() {
+  noTone(BUZZER_PIN);
+  isSoundPlaying = false;
+}
+
+void playToneI2S(uint16_t freqHz, uint16_t durationMs, uint8_t volumePercent) {
+  isSoundPlaying = true;
+  tone(BUZZER_PIN, freqHz, durationMs);
+  delay(durationMs);
+  audioPowerDown();
+}
+
+#else
+// ════════════════════════════════════════════════════════════════
+//  AUDIO NATIVO ESP32-S3 (I2S Digital MAX98357A con corte a 0 µA)
+// ════════════════════════════════════════════════════════════════
 #include "driver/i2s.h"
 #include <math.h>
 
@@ -9,9 +34,8 @@
 static bool i2sInstalled = false;
 
 void audioInit() {
-  // Configurar pin de Shutdown del amplificador MAX98357A
   pinMode(I2S_SD_PIN, OUTPUT);
-  digitalWrite(I2S_SD_PIN, LOW); // Iniciar apagado (0 µA)
+  digitalWrite(I2S_SD_PIN, LOW); // 0 µA en reposo
 
   if (!i2sInstalled) {
     i2s_config_t i2s_config = {
@@ -41,7 +65,6 @@ void audioInit() {
     }
   }
 
-  // Asegurar amplificador apagado en reposo
   audioPowerDown();
 }
 
@@ -54,13 +77,11 @@ void playToneI2S(uint16_t freqHz, uint16_t durationMs, uint8_t volumePercent) {
   if (!i2sInstalled || freqHz == 0 || durationMs == 0) return;
 
   isSoundPlaying = true;
-  // 1. Despertar amplificador (HIGH = activo)
   digitalWrite(I2S_SD_PIN, HIGH);
-  delay(10); // Pequeño retardo para estabilizar la alimentación del DAC
+  delay(10);
 
-  // 2. Parámetros de la forma de onda
   volumePercent = constrain(volumePercent, 0, 100);
-  int16_t maxAmplitude = (int16_t)((32767.0f * (volumePercent / 100.0f)) * 0.7f); // Evitar saturación
+  int16_t maxAmplitude = (int16_t)((32767.0f * (volumePercent / 100.0f)) * 0.7f);
 
   size_t totalSamples = (I2S_SAMPLE_RATE * durationMs) / 1000;
   size_t attackSamples = totalSamples / 10;
@@ -68,7 +89,7 @@ void playToneI2S(uint16_t freqHz, uint16_t durationMs, uint8_t volumePercent) {
   size_t decaySamples = attackSamples;
 
   const size_t CHUNK_SIZE = 128;
-  int16_t buffer[CHUNK_SIZE * 2]; // Estéreo (L + R)
+  int16_t buffer[CHUNK_SIZE * 2];
 
   float phase = 0.0f;
   float phaseStep = (2.0f * (float)M_PI * freqHz) / (float)I2S_SAMPLE_RATE;
@@ -82,8 +103,6 @@ void playToneI2S(uint16_t freqHz, uint16_t durationMs, uint8_t volumePercent) {
 
     for (size_t i = 0; i < chunk; i++) {
       size_t currentSample = samplesGenerated + i;
-      
-      // Envolvente de volumen para evitar chasquidos (clicks) al iniciar o parar
       float env = 1.0f;
       if (currentSample < attackSamples) {
         env = (float)currentSample / (float)attackSamples;
@@ -95,7 +114,6 @@ void playToneI2S(uint16_t freqHz, uint16_t durationMs, uint8_t volumePercent) {
       phase += phaseStep;
       if (phase >= 2.0f * (float)M_PI) phase -= 2.0f * (float)M_PI;
 
-      // Duplicar para canal Izquierdo y Derecho (L + R)
       buffer[i * 2]     = sampleVal;
       buffer[i * 2 + 1] = sampleVal;
     }
@@ -105,30 +123,23 @@ void playToneI2S(uint16_t freqHz, uint16_t durationMs, uint8_t volumePercent) {
     samplesGenerated += chunk;
   }
 
-  // Dejar que termine de vaciarse el búfer DMA
   delay(25);
-
-  // 3. Volver a apagar el amplificador para mantener 0 µA de consumo
   audioPowerDown();
 }
+#endif
 
+// ════════════════════════════════════════════════════════════════
+//  PATRONES ACÚSTICOS COMUNES DE ORIENTACIÓN ESPACIAL
+// ════════════════════════════════════════════════════════════════
 void playAcousticBeacon() {
-  // Patrón sonoro dual (baliza acústica de alta localización tridimensional)
-  // Dos tonos puros ascendentes con separación rítmica clara
   uint8_t vol = (nodeConfig.volume > 0) ? nodeConfig.volume : 80;
-  
-  digitalWrite(I2S_SD_PIN, HIGH);
-  delay(10);
-  
-  playToneI2S(880,  120, vol);  // Nota A5
-  delay(60);
-  playToneI2S(1320, 220, vol);  // Nota E6 (Quinta armónica para ecolocalización precisa)
-  
+  playToneI2S(880,  120, vol);  // A5
+  delay(50);
+  playToneI2S(1320, 220, vol);  // E6 (quinta armónica)
   audioPowerDown();
 }
 
 void playArrivalChime() {
-  // Acorde agradable de llegada al aula
   uint8_t vol = (nodeConfig.volume > 0) ? nodeConfig.volume : 80;
   playToneI2S(523, 100, vol); // C5
   delay(30);

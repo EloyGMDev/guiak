@@ -20,7 +20,11 @@ void hardwareInit() {
   pinMode(BTN_CONFIG_PIN, INPUT_PULLUP);
 
   // Inicializar bus SPI para lector RFID en los pines asignados
+  #if defined(ARDUINO_UNOR4_WIFI)
+  SPI.begin();
+#else
   SPI.begin(RFID_SCK_PIN, RFID_MISO_PIN, RFID_MOSI_PIN, RFID_SS_PIN);
+#endif
   mfrc522.PCD_Init();
   mfrc522.PCD_SetAntennaGain(mfrc522.RxGain_max);
 }
@@ -71,6 +75,14 @@ void handleRFID() {
 
   lastUID = uid;
   lastUIDTime = millis();
+
+  // Comprobar si el aula esta en modo bloqueo de emergencia (Lockdown)
+  if (lockdownMode) {
+    playWarningChime();
+    firebasePushLog("BLOQUEO", "Acceso DENEGADO por LOCKDOWN: Tarjeta " + uid, LOG_WARN);
+    mfrc522.PICC_HaltA();
+    return;
+  }
 
   // Registrar acceso
   dbIncrementAccessCount();
