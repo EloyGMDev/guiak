@@ -6,6 +6,8 @@
 #include "esp_adc_cal.h"
 #endif
 
+bool isBatteryConnected = false;
+
 void powerInit() {
   // Configuración del ADC para lectura de batería
   analogReadResolution(12); // 0 a 4095
@@ -28,14 +30,22 @@ uint16_t readBatteryMillivolts() {
   }
   float avgRaw = (float)rawSum / SAMPLES;
 
-  // En ESP32 con atenuación de 11dB, 4095 equivale a ~3100 mV en el pin físico
-  float pinMillivolts = (avgRaw / 4095.0f) * 3100.0f;
+  // Si el valor ADC es casi nulo (< 80 sobre 4095), no hay divisor/batería conectada
+  // (el Arduino está alimentado directamente por cable USB de 5V)
+  if (avgRaw < 80) {
+    return 0;
+  }
 
-  // Aplicar factor del divisor resistivo (ej. R1=100k, R2=100k -> x2.0)
+#if defined(ARDUINO_UNOR4_WIFI)
+  float pinMillivolts = (avgRaw / 4095.0f) * 5000.0f;
+#else
+  float pinMillivolts = (avgRaw / 4095.0f) * 3100.0f;
+#endif
+
+  // Aplicar factor del divisor resistivo
   float batMv = pinMillivolts * ADC_DIVIDER_RATIO;
   
-  // Limitar a rangos razonables de celda Li-ion (3.0V a 4.3V)
-  if (batMv < 2500) batMv = 2500;
+  if (batMv < 1000) return 0;
   if (batMv > 4350) batMv = 4350;
 
   return (uint16_t)batMv;
@@ -44,18 +54,26 @@ uint16_t readBatteryMillivolts() {
 void updateBatteryStatus() {
   batteryMillivolts = readBatteryMillivolts();
 
-  // Calcular porcentaje con curva de descarga estimada para Li-Ion (3300mV a 4200mV)
-  if (batteryMillivolts <= BATTERY_MIN_MV) {
-    batteryPercent = 0;
-  } else if (batteryMillivolts >= BATTERY_MAX_MV) {
+  if (batteryMillivolts < 2000) {
+    // Modo alimentación externa continua (USB / Fuente 5V) sin batería Li-Ion
+    isBatteryConnected = false;
     batteryPercent = 100;
   } else {
-    // Estimación lineal escalada
-    batteryPercent = (uint8_t)(((batteryMillivolts - BATTERY_MIN_MV) * 100UL) / (BATTERY_MAX_MV - BATTERY_MIN_MV));
+    // Batería Li-Ion presente: calcular porcentaje real
+    isBatteryConnected = true;
+    if (batteryMillivolts <= BATTERY_MIN_MV) {
+      batteryPercent = 0;
+    } else if (batteryMillivolts >= BATTERY_MAX_MV) {
+      batteryPercent = 100;
+    } else {
+      batteryPercent = (uint8_t)(((batteryMillivolts - BATTERY_MIN_MV) * 100UL) / (BATTERY_MAX_MV - BATTERY_MIN_MV));
+    }
   }
 }
 
 bool isBatteryLow() {
+  // En modo USB continuo nunca hay aviso de batería baja
+  if (!isBatteryConnected) return false;
   return (batteryPercent <= BATTERY_LOW_THRESH);
 }
 

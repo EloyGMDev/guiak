@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+extern bool isBleAvailable;
+
 // Inicializa el subsistema Bluetooth BLE (iBeacon + Servidor GATT de interacción)
 void bleBeaconInit();
 

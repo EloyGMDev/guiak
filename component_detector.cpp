@@ -3,6 +3,7 @@
 #include "hardware_io.h"
 #include "power_manager.h"
 #include "database.h"
+#include "ble_beacon.h"
 #include "utils.h"
 #include "firebase_client.h"
 
@@ -34,9 +35,16 @@ static const NoteDef OMINOUS_MELODY[] = {
 };
 static const size_t OMINOUS_MELODY_LEN = sizeof(OMINOUS_MELODY) / sizeof(OMINOUS_MELODY[0]);
 
+bool isAdaptiveModeActive = false;
 static ComponentReport lastReport = { false, false, false, false, false, false, false, "" };
 static unsigned long lastCheckMs = 0;
 static bool alarmCurrentlyTriggered = false;
+
+static bool baselineRfidOk = false;
+static bool baselineBleOk = false;
+static bool baselineBatteryOk = false;
+static bool baselineAudioOk = false;
+static bool baselineSelfTestDone = false;
 
 void componentDetectorInit() {
   // Configuración del pin de LED de estado como salida
@@ -51,7 +59,7 @@ void componentDetectorInit() {
   digitalWrite(BUZZER_PIN, LOW);
 #endif
 
-  addLog("DIAGNOSTICO", "Sistema de detección de componentes listo.");
+  addLog("DIAGNOSTICO", "Sistema de detección y adaptación de componentes listo.");
 }
 
 ComponentReport runComponentSelfTest() {
@@ -70,40 +78,35 @@ ComponentReport runComponentSelfTest() {
   // 1. Verificación del lector RFID MFRC522 (consulta de registros vía SPI)
   report.rfidOk = checkRFIDConnected();
   if (report.rfidOk) {
-    addLog("DIAGNOSTICO", " -> [OK] Lector RFID MFRC522 conectado y comunicando por SPI.");
+    addLog("DIAGNOSTICO", " -> [OK] Lector RFID MFRC522 activo en bus SPI.");
   } else {
-    addLog("DIAGNOSTICO", " -> [FALLO] Lector RFID MFRC522 no responde o desconectado.", LOG_ERROR);
-    report.missingSummary += "[RFID MFRC522 no responde] ";
+    addLog("DIAGNOSTICO", " -> [AUSENTE] Lector RFID MFRC522 no responde o desconectado.", LOG_WARN);
+    report.missingSummary += "[Lector RFID no detectado] ";
   }
 
   // 2. Verificación del sensor ADC de Batería
-  uint16_t batMv = readBatteryMillivolts();
-  // Un valor de 0 mV o extremadamente bajo (<1000 mV) indica sensor/divisor desconectado
-  if (batMv >= 1000) {
+  updateBatteryStatus();
+  if (isBatteryConnected) {
     report.batteryOk = true;
-    addLog("DIAGNOSTICO", " -> [OK] Sensor Bateria ADC operativo (" + String(batMv) + " mV).");
+    addLog("DIAGNOSTICO", " -> [OK] Batería Li-Ion conectada (" + String(batteryMillivolts) + " mV, " + String(batteryPercent) + "%).");
   } else {
     report.batteryOk = false;
-    addLog("DIAGNOSTICO", " -> [FALLO] Sensor Bateria ADC sin lectura valida (" + String(batMv) + " mV).", LOG_WARN);
-    report.missingSummary += "[Bateria/ADC sin lectura] ";
+    addLog("DIAGNOSTICO", " -> [INFO] Sin batería Li-Ion (Alimentado por USB 5V continuo).");
+    report.missingSummary += "[Modo USB / Sin batería Li-Ion] ";
   }
 
   // 3. Verificación de Memoria No Volátil (NVS Flash / Preferences)
   uint32_t accesses = dbGetAccessCount();
-  report.nvsOk = true; // Si dbInit() y la lectura de claves NVS pasaron, NVS está OK
-  addLog("DIAGNOSTICO", " -> [OK] Memoria Flash NVS accesible (Accesos registrados: " + String(accesses) + ").");
+  report.nvsOk = true;
+  addLog("DIAGNOSTICO", " -> [OK] Memoria Flash NVS accesible (Accesos: " + String(accesses) + ").");
 
   // 4. Verificación del controlador Bluetooth LE (BLE)
-#if defined(ARDUINO_UNOR4_WIFI)
-  report.bleOk = true;
-#else
-  report.bleOk = BLEDevice::getInitialized();
-#endif
+  report.bleOk = isBleAvailable;
   if (report.bleOk) {
-    addLog("DIAGNOSTICO", " -> [OK] Submodulo Bluetooth BLE activo y transmitiendo iBeacon.");
+    addLog("DIAGNOSTICO", " -> [OK] Bluetooth BLE activo emitiendo señal.");
   } else {
-    addLog("DIAGNOSTICO", " -> [FALLO] Bluetooth BLE no inicializado correctamente.", LOG_ERROR);
-    report.missingSummary += "[Bluetooth BLE caido] ";
+    addLog("DIAGNOSTICO", " -> [AUSENTE] Bluetooth BLE no activo.", LOG_WARN);
+    report.missingSummary += "[Bluetooth BLE no disponible] ";
   }
 
   // 5. Verificación de Actuadores Acústicos (Buzzer y Altavoz)
@@ -115,18 +118,31 @@ ComponentReport runComponentSelfTest() {
 
   report.audioSpeakerOk = nodeConfig.hasSpeaker && isAudioReady();
 
-  addLog("DIAGNOSTICO", " -> Estado actuadores: Buzzer=" + String(report.buzzerOk ? "SI" : "NO") +
+  addLog("DIAGNOSTICO", " -> Actuadores acústicos: Buzzer=" + String(report.buzzerOk ? "SI" : "NO") +
                         ", Altavoz=" + String(report.audioSpeakerOk ? "SI" : "NO") +
                         ", LEDs=SI (Pin " + String(LED_STATUS_PIN) + ")");
 
-  // Criterio global:
-  // Componentes críticos mínimos: RFID operativo, Batería con lectura válida, NVS y BLE
-  report.allCriticalOk = report.rfidOk && report.batteryOk && report.nvsOk && report.bleOk;
+  if (!report.buzzerOk && !report.audioSpeakerOk) {
+    report.missingSummary += "[Sin actuador acústico (Alerta por LEDs)] ";
+  }
+
+  // Criterio de hardware completo:
+  // Es 100% completo si RFID, BLE y algún canal de sonido están presentes
+  report.allCriticalOk = report.rfidOk && report.bleOk && (report.buzzerOk || report.audioSpeakerOk);
 
   if (report.allCriticalOk) {
-    addLog("DIAGNOSTICO", "TODOS LOS COMPONENTES DETECTADOS CORRECTAMENTE. Estado: SALUDABLE.");
+    addLog("DIAGNOSTICO", "TODOS LOS COMPONENTES DETECTADOS. Estado: COMPLETO Y SALUDABLE.");
   } else {
-    addLog("DIAGNOSTICO", "¡ALERTA! Fallo en componentes detectado: " + report.missingSummary, LOG_ERROR);
+    addLog("DIAGNOSTICO", "AVISO: Componentes no detectados: " + report.missingSummary, LOG_WARN);
+  }
+
+  // Si es la primera ejecución en boot, memorizar la configuración base de hardware
+  if (!baselineSelfTestDone) {
+    baselineRfidOk = report.rfidOk;
+    baselineBleOk = report.bleOk;
+    baselineBatteryOk = report.batteryOk;
+    baselineAudioOk = (report.buzzerOk || report.audioSpeakerOk);
+    baselineSelfTestDone = true;
   }
 
   lastReport = report;
@@ -230,33 +246,93 @@ void triggerComponentFailureAlarm(const ComponentReport& report) {
   if (alarmCurrentlyTriggered) return; // Evitar reentrada
   alarmCurrentlyTriggered = true;
 
-  addLog("DIAGNOSTICO", "¡FALLO DE HARDWARE! Faltan componentes: " + report.missingSummary, LOG_ERROR);
+  addLog("DIAGNOSTICO", "¡AVISO DE HARDWARE! Componentes no detectados: " + report.missingSummary, LOG_WARN);
 
   // Notificar a Firebase de inmediato si la conexión está disponible
-  firebasePushLog("DIAGNOSTICO", "FALLO: Faltan componentes: " + report.missingSummary, LOG_ERROR);
+  firebasePushLog("DIAGNOSTICO", "AVISO: Componentes no detectados: " + report.missingSummary, LOG_WARN);
 
-  // Hacer sonar la melodía chunga durante 5 segundos
+  // Hacer sonar la melodía chunga durante 5 segundos (Buzzer -> Altavoz -> LEDs)
   playOminousAlarm(COMPONENT_ALARM_DURATION_MS);
 
   alarmCurrentlyTriggered = false;
 }
 
+void adaptSystemToAvailableHardware(const ComponentReport& report) {
+  isAdaptiveModeActive = true;
+
+  addLog("SISTEMA", "==================================================");
+  addLog("SISTEMA", "[ADAPTACION AUTOMATICA DE HARDWARE GUIAK]");
+  addLog("SISTEMA", "Reconfigurando subsistemas para operar con tolerancia a fallos:");
+
+  // 1. Adaptación de RFID
+  if (!report.rfidOk) {
+    isRfidAvailable = false;
+    addLog("SISTEMA", " * Lector RFID: DESACTIVADO. La deteccion de alumnos opera via Baliza BLE y App movil.");
+  } else {
+    isRfidAvailable = true;
+    addLog("SISTEMA", " * Lector RFID: ACTIVO en bus SPI.");
+  }
+
+  // 2. Adaptación de Batería
+  if (!report.batteryOk) {
+    isBatteryConnected = false;
+    batteryPercent = 100;
+    addLog("SISTEMA", " * Fuente de Energia: MODO USB / CONTINUO ACTIVO (Alertas de bateria baja suspendidas).");
+  } else {
+    addLog("SISTEMA", " * Fuente de Energia: BATERIA LI-ION ACTIVA.");
+  }
+
+  // 3. Adaptación de Audio
+  if (!report.buzzerOk && !report.audioSpeakerOk) {
+    addLog("SISTEMA", " * Actuadores Acusticos: DESACTIVADOS. Senales redirigidas a pulsos de LED.");
+  } else if (report.buzzerOk) {
+    addLog("SISTEMA", " * Actuadores Acusticos: BUZZER PRINCIPAL ACTIVO.");
+  } else {
+    addLog("SISTEMA", " * Actuadores Acusticos: ALTAVOZ ACTIVO.");
+  }
+
+  // 4. Adaptación de BLE
+  if (!report.bleOk) {
+    addLog("SISTEMA", " * Bluetooth BLE: DESACTIVADO. Portal Wi-Fi y servidor web operativos.");
+  } else {
+    addLog("SISTEMA", " * Bluetooth BLE: ACTIVO (Servicio SONA y Baliza iBeacon).");
+  }
+
+  addLog("SISTEMA", ">>> SISTEMA TOTALMENTE ESTABLE Y OPERATIVO EN MODO RESILIENTE <<<");
+  addLog("SISTEMA", "==================================================");
+
+  firebasePushLog("SISTEMA", "Nodo adaptado y operativo: " + report.missingSummary, LOG_INFO);
+}
+
 void checkComponentHealthLoop() {
+  if (!baselineSelfTestDone) return;
   if (millis() - lastCheckMs < COMPONENT_CHECK_INTERVAL_MS) {
     return;
   }
   lastCheckMs = millis();
 
-  // Verificación no bloqueante en caliente de componentes clave
-  bool rfidAlive = checkRFIDConnected();
-  uint16_t batMv = readBatteryMillivolts();
-  bool batAlive = (batMv >= 1000);
+  // Comprobar únicamente si algún componente que funcionaba en el arranque se ha desconectado en caliente
+  bool hotFailure = false;
+  String hotReason = "";
 
-  if (!rfidAlive || !batAlive) {
+  if (baselineRfidOk && !checkRFIDConnected()) {
+    hotFailure = true;
+    hotReason += "[Desconexion en caliente de RFID] ";
+    isRfidAvailable = false; // Desactivar para que loop no se cuelgue ni bloquee el bus SPI
+    baselineRfidOk = false;
+  }
+
+  if (baselineBleOk && !isBleAvailable) {
+    hotFailure = true;
+    hotReason += "[Caida en caliente de Bluetooth BLE] ";
+    baselineBleOk = false;
+  }
+
+  if (hotFailure) {
+    addLog("DIAGNOSTICO", "¡FALLO EN CALIENTE DETECTADO! " + hotReason, LOG_ERROR);
     ComponentReport rep = runComponentSelfTest();
-    if (!rep.allCriticalOk) {
-      triggerComponentFailureAlarm(rep);
-    }
+    triggerComponentFailureAlarm(rep);
+    adaptSystemToAvailableHardware(rep);
   }
 }
 

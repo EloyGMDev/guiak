@@ -5,6 +5,7 @@
 #include <MFRC522.h>
 
 extern MFRC522 mfrc522;
+extern bool isRfidAvailable;
 
 // Inicializa periféricos de entrada y salida (RFID, Botones, Pines)
 void hardwareInit();

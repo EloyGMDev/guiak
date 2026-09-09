@@ -3,6 +3,7 @@
 #include "audio_manager.h"
 #include "firebase_client.h"
 #include "component_detector.h"
+#include "utils.h"
 
 #define GUIAK_SERVICE_UUID        "0000FD00-0000-1000-8000-00805F9B34FB"
 #define CHAR_TRIGGER_UUID        "0000FD01-0000-1000-8000-00805F9B34FB"
@@ -10,6 +11,8 @@
 #define CHAR_PRESENCE_UUID       "0000FD03-0000-1000-8000-00805F9B34FB"
 #define BATTERY_SERVICE_UUID     "0000180F-0000-1000-8000-00805F9B34FB"
 #define CHAR_BATTERY_LEVEL_UUID  "00002A19-0000-1000-8000-00805F9B34FB"
+
+bool isBleAvailable = false;
 
 #if defined(ESP32)
 // ════════════════════════════════════════════════════════════════
@@ -77,6 +80,7 @@ class TriggerCallbacks : public BLECharacteristicCallbacks {
 
 void bleBeaconInit() {
   BLEDevice::init(nodeConfig.roomCode);
+  isBleAvailable = true;
   esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P6);
 
   pServer = BLEDevice::createServer();
@@ -186,8 +190,12 @@ static BLEUnsignedCharCharacteristic r4BatteryChar(CHAR_BATTERY_LEVEL_UUID, BLER
 
 void bleBeaconInit() {
   if (!BLE.begin()) {
+    isBleAvailable = false;
+    addLog("BLE", "Aviso: Hardware BLE no pudo iniciar. Modo adaptado: funcionando sin Bluetooth.", LOG_WARN);
     return;
   }
+  isBleAvailable = true;
+
   BLE.setLocalName(nodeConfig.roomCode);
   BLE.setAdvertisedService(r4SonaService);
 
@@ -208,10 +216,12 @@ void bleBeaconInit() {
 }
 
 void bleUpdateBatteryLevel(uint8_t percent) {
+  if (!isBleAvailable) return;
   r4BatteryChar.writeValue(percent);
 }
 
 void bleStop() {
+  if (!isBleAvailable) return;
   BLE.stopAdvertise();
   BLE.end();
 }
@@ -221,6 +231,7 @@ void bleStart() {
 }
 
 void bleLoop() {
+  if (!isBleAvailable) return;
   BLEDevice central = BLE.central();
   if (central && central.connected()) {
     if (r4TriggerChar.written()) {
@@ -259,7 +270,7 @@ void bleLoop() {
 
 #else
 // Fallback para placas sin BLE
-void bleBeaconInit() {}
+void bleBeaconInit() { isBleAvailable = false; }
 void bleUpdateBatteryLevel(uint8_t percent) {}
 void bleStop() {}
 void bleStart() {}

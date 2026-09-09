@@ -15,6 +15,15 @@ void audioPowerDown() {
 }
 
 void playToneI2S(uint16_t freqHz, uint16_t durationMs, uint8_t volumePercent) {
+  if (!nodeConfig.hasBuzzer && !nodeConfig.hasSpeaker) {
+    // Modo adaptado: Sin altavoz/buzzer, el sistema genera pulsos visuales de LED seguros
+    #if defined(LED_STATUS_PIN) && (LED_STATUS_PIN >= 0)
+    digitalWrite(LED_STATUS_PIN, HIGH);
+    delay(durationMs > 60 ? 60 : durationMs);
+    digitalWrite(LED_STATUS_PIN, LOW);
+    #endif
+    return;
+  }
   isSoundPlaying = true;
   tone(BUZZER_PIN, freqHz, durationMs);
   delay(durationMs);
@@ -22,7 +31,7 @@ void playToneI2S(uint16_t freqHz, uint16_t durationMs, uint8_t volumePercent) {
 }
 
 bool isAudioReady() {
-  return true;
+  return (nodeConfig.hasBuzzer || nodeConfig.hasSpeaker);
 }
 
 #else

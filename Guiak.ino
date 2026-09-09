@@ -66,8 +66,10 @@ void setup() {
   componentDetectorInit();
   ComponentReport compReport = runComponentSelfTest();
   if (!compReport.allCriticalOk) {
-    // Si falta algún componente crítico, dispara la alarma de 5 segundos (Buzzer -> Altavoz -> LEDs)
+    // 1. Dispara la melodía de aviso de 5 segundos (Buzzer -> Altavoz -> LEDs)
     triggerComponentFailureAlarm(compReport);
+    // 2. El sistema se adapta automáticamente e inicia el programa con los componentes disponibles
+    adaptSystemToAvailableHardware(compReport);
   } else {
     // Si todos los componentes están saludables, emite el tono armónico de bienvenida
     playArrivalChime();
@@ -82,7 +84,7 @@ void setup() {
     wifiServiceInit();
   }
 
-  addLog("SISTEMA", "Nodo SONA operativo. RAM libre: " + String(getFreeHeapBytes() / 1024) + " KB");
+  addLog("SISTEMA", "Nodo Guiak iniciado con exito (" + String(isAdaptiveModeActive ? "Modo Adaptado Resiliente" : "Modo Completo") + "). RAM libre: " + String(getFreeHeapBytes() / 1024) + " KB");
 }
 
 void loop() {

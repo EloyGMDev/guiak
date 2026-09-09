@@ -8,6 +8,7 @@
 #include <SPI.h>
 
 MFRC522 mfrc522(RFID_SS_PIN, RFID_RST_PIN);
+bool isRfidAvailable = false;
 
 static String lastUID = "";
 static unsigned long lastUIDTime = 0;
@@ -26,8 +27,17 @@ void hardwareInit() {
 #else
   SPI.begin(RFID_SCK_PIN, RFID_MISO_PIN, RFID_MOSI_PIN, RFID_SS_PIN);
 #endif
+
   mfrc522.PCD_Init();
   mfrc522.PCD_SetAntennaGain(mfrc522.RxGain_max);
+
+  // Verificación adaptativa: si el lector no está conectado, el sistema se adapta
+  isRfidAvailable = checkRFIDConnected();
+  if (isRfidAvailable) {
+    addLog("HARDWARE", "Lector RFID MFRC522 detectado y activo en bus SPI.");
+  } else {
+    addLog("HARDWARE", "Aviso: Lector RFID no detectado. El nodo se adapta para funcionar sin RFID (modo baliza BLE y app).", LOG_WARN);
+  }
 }
 
 void checkConfigButton() {
@@ -57,6 +67,9 @@ void checkConfigButton() {
 }
 
 void handleRFID() {
+  // Si el componente no está físicamente presente, salir de inmediato sin tocar SPI
+  if (!isRfidAvailable) return;
+
   if (!mfrc522.PICC_IsNewCardPresent() || !mfrc522.PICC_ReadCardSerial()) {
     return;
   }

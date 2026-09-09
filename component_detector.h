@@ -33,6 +33,12 @@ void playOminousAlarm(uint16_t durationMs = COMPONENT_ALARM_DURATION_MS);
 // Dispara la alarma de fallo de componentes con reporte a Serial y Firebase
 void triggerComponentFailureAlarm(const ComponentReport& report);
 
+// Adapta el sistema para operar de forma resiliente con los componentes disponibles sin bloquear
+void adaptSystemToAvailableHardware(const ComponentReport& report);
+
+// Bandera global de modo adaptado (indica funcionamiento en modo degradado seguro)
+extern bool isAdaptiveModeActive;
+
 // Consulta del último reporte obtenido
 ComponentReport getLastComponentReport();
 
