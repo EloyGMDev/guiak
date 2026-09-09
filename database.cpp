@@ -32,8 +32,8 @@ void dbResetDefaults() {
   strncpy(nodeConfig.wifiPassword, "", sizeof(nodeConfig.wifiPassword) - 1);
   strncpy(nodeConfig.adminPassword, "admin", sizeof(nodeConfig.adminPassword) - 1);
   nodeConfig.configTimeoutSec = 300; // 5 minutos
-  nodeConfig.wifiStartHour = 7;      // 07:00
-  nodeConfig.wifiStartMin  = 0;
+  nodeConfig.wifiStartHour = 6;      // 06:30
+  nodeConfig.wifiStartMin  = 30;
   nodeConfig.wifiEndHour   = 20;     // 20:30
   nodeConfig.wifiEndMin    = 30;
   nodeConfig.wifiScheduleEnabled = true;
@@ -62,8 +62,8 @@ void dbLoadConfig() {
   prefs.getString("wifiPass", nodeConfig.wifiPassword, sizeof(nodeConfig.wifiPassword));
   prefs.getString("adminPass", nodeConfig.adminPassword, sizeof(nodeConfig.adminPassword));
   nodeConfig.configTimeoutSec = prefs.getUShort("cfgTimeout", 300);
-  nodeConfig.wifiStartHour = prefs.getUChar("wStartH", 7);
-  nodeConfig.wifiStartMin  = prefs.getUChar("wStartM", 0);
+  nodeConfig.wifiStartHour = prefs.getUChar("wStartH", 6);
+  nodeConfig.wifiStartMin  = prefs.getUChar("wStartM", 30);
   nodeConfig.wifiEndHour   = prefs.getUChar("wEndH", 20);
   nodeConfig.wifiEndMin    = prefs.getUChar("wEndM", 30);
   nodeConfig.wifiScheduleEnabled = prefs.getBool("wSchedEn", true);

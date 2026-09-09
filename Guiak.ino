@@ -46,7 +46,9 @@ void setup() {
   // 1. Inicializar almacenamiento persistente NVS
   dbInit();
   addLog("SISTEMA", "Aula: " + String(nodeConfig.roomName) + " (Codigo: " + String(nodeConfig.roomCode) + ")");
-  addLog("SISTEMA", "Horario Wi-Fi configurado: " + String(nodeConfig.wifiStartHour) + ":00 a " + String(nodeConfig.wifiEndHour) + ":" + String(nodeConfig.wifiEndMin));
+  char schedBuf[32];
+  snprintf(schedBuf, sizeof(schedBuf), "%02d:%02d a %02d:%02d", nodeConfig.wifiStartHour, nodeConfig.wifiStartMin, nodeConfig.wifiEndHour, nodeConfig.wifiEndMin);
+  addLog("SISTEMA", "Horario Wi-Fi configurado: " + String(schedBuf));
 
   // 2. Inicializar sistema de energía y lectura de batería
   powerInit();

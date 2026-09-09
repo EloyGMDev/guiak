@@ -215,7 +215,7 @@ static const char HTML_CONFIG_PAGE[] PROGMEM = R"rawhtml(
       <div class="row">
         <div>
           <label>Hora Inicio (Mañana)</label>
-          <input type="time" id="wifiStart" value="07:00">
+          <input type="time" id="wifiStart" value="06:30">
         </div>
         <div>
           <label>Hora Fin (Tarde)</label>
