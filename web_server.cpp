@@ -7,12 +7,19 @@
 #include "ntp_sync.h"
 #include "utils.h"
 
+#if defined(ESP32)
 #include <WiFi.h>
 #include <WebServer.h>
 #include <esp_wifi.h>
+static WebServer server(80);
+#elif defined(ARDUINO_UNOR4_WIFI)
+#include <WiFiS3.h>
+static WiFiServer server(80);
+#else
+#include <WiFi.h>
+#endif
 #include <time.h>
 
-static WebServer server(80);
 static bool serverRunning = false;
 static unsigned long lastScheduleCheck = 0;
 const unsigned long SCHEDULE_CHECK_INTERVAL = 15000; // Comprobar cada 15 segundos
@@ -299,28 +306,53 @@ static const char HTML_CONFIG_PAGE[] PROGMEM = R"rawhtml(
 </html>
 )rawhtml";
 
-bool isWithinWifiSchedule() {
-  if (!nodeConfig.wifiScheduleEnabled) return true; // Si el horario está desactivado, Wi-Fi siempre permitido
+static bool processSavePayload(const String& body) {
+  auto extractStr = [](const String& src, const String& key) -> String {
+    int idx = src.indexOf("\"" + key + "\":");
+    if (idx == -1) return "";
+    int start = src.indexOf("\"", idx + key.length() + 2) + 1;
+    int end = src.indexOf("\"", start);
+    if (start <= 0 || end == -1) return "";
+    return src.substring(start, end);
+  };
 
-  struct tm timeinfo;
-  if (!getLocalTime(&timeinfo, 100)) {
-    // Si aún no hemos sincronizado la hora por NTP tras arrancar, asumimos que estamos dentro de horario
-    // para poder conectar y sincronizar.
-    return true;
-  }
+  auto extractInt = [](const String& src, const String& key) -> int {
+    int idx = src.indexOf("\"" + key + "\":");
+    if (idx == -1) return -1;
+    int start = idx + key.length() + 2;
+    while (start < src.length() && (src[start] == ' ' || src[start] == ':')) start++;
+    int end = start;
+    while (end < src.length() && (isdigit(src[end]))) end++;
+    return src.substring(start, end).toInt();
+  };
 
-  int curMin   = timeinfo.tm_hour * 60 + timeinfo.tm_min;
-  int startMin = nodeConfig.wifiStartHour * 60 + nodeConfig.wifiStartMin;
-  int endMin   = nodeConfig.wifiEndHour * 60 + nodeConfig.wifiEndMin;
+  String newName = extractStr(body, "roomName");
+  String newCode = extractStr(body, "roomCode");
+  String newBld  = extractStr(body, "building");
+  int newFloor   = extractInt(body, "floor");
+  int newVol     = extractInt(body, "volume");
+  int sH         = extractInt(body, "wStartH");
+  int sM         = extractInt(body, "wStartM");
+  int eH         = extractInt(body, "wEndH");
+  int eM         = extractInt(body, "wEndM");
+  bool schedEn   = (body.indexOf("\"wSchedEn\":true") != -1);
 
-  return (curMin >= startMin && curMin <= endMin);
+  if (newName.length() > 0) newName.toCharArray(nodeConfig.roomName, sizeof(nodeConfig.roomName));
+  if (newCode.length() > 0) newCode.toCharArray(nodeConfig.roomCode, sizeof(nodeConfig.roomCode));
+  if (newBld.length() > 0)  newBld.toCharArray(nodeConfig.building, sizeof(nodeConfig.building));
+  if (newFloor >= 0) nodeConfig.floor = newFloor;
+  if (newVol >= 0 && newVol <= 100) nodeConfig.volume = newVol;
+  if (sH >= 0 && sH <= 23) nodeConfig.wifiStartHour = sH;
+  if (sM >= 0 && sM <= 59) nodeConfig.wifiStartMin = sM;
+  if (eH >= 0 && eH <= 23) nodeConfig.wifiEndHour = eH;
+  if (eM >= 0 && eM <= 59) nodeConfig.wifiEndMin = eM;
+  nodeConfig.wifiScheduleEnabled = schedEn;
+
+  dbSaveConfig();
+  return true;
 }
 
-void handleRoot() {
-  server.send_P(200, "text/html", HTML_CONFIG_PAGE);
-}
-
-void handleStatus() {
+static String getStatusJson() {
   updateBatteryStatus();
   String json = "{";
   json += "\"roomName\":\"" + String(nodeConfig.roomName) + "\",";
@@ -337,7 +369,43 @@ void handleStatus() {
   json += "\"wEndM\":" + String(nodeConfig.wifiEndMin) + ",";
   json += "\"wSchedEn\":" + String(nodeConfig.wifiScheduleEnabled ? "true" : "false");
   json += "}";
-  server.send(200, "application/json", json);
+  return json;
+}
+
+bool isWithinWifiSchedule() {
+  if (!nodeConfig.wifiScheduleEnabled) return true;
+
+#if defined(ESP32)
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo, 100)) {
+    return true;
+  }
+  int curMin = timeinfo.tm_hour * 60 + timeinfo.tm_min;
+#elif defined(ARDUINO_UNOR4_WIFI)
+  unsigned long epoch = WiFi.getTime();
+  if (epoch == 0) return true;
+  epoch += 3600;
+  time_t t = (time_t)epoch;
+  struct tm* timeinfo = gmtime(&t);
+  if (!timeinfo) return true;
+  int curMin = timeinfo->tm_hour * 60 + timeinfo->tm_min;
+#else
+  int curMin = 12 * 60;
+#endif
+
+  int startMin = nodeConfig.wifiStartHour * 60 + nodeConfig.wifiStartMin;
+  int endMin   = nodeConfig.wifiEndHour * 60 + nodeConfig.wifiEndMin;
+
+  return (curMin >= startMin && curMin <= endMin);
+}
+
+#if defined(ESP32)
+void handleRoot() {
+  server.send_P(200, "text/html", HTML_CONFIG_PAGE);
+}
+
+void handleStatus() {
+  server.send(200, "application/json", getStatusJson());
 }
 
 void handleTestSound() {
@@ -347,63 +415,92 @@ void handleTestSound() {
 
 void handleSave() {
   if (server.hasArg("plain")) {
-    String body = server.arg("plain");
-
-    auto extractStr = [](const String& src, const String& key) -> String {
-      int idx = src.indexOf("\"" + key + "\":");
-      if (idx == -1) return "";
-      int start = src.indexOf("\"", idx + key.length() + 2) + 1;
-      int end = src.indexOf("\"", start);
-      if (start <= 0 || end == -1) return "";
-      return src.substring(start, end);
-    };
-
-    auto extractInt = [](const String& src, const String& key) -> int {
-      int idx = src.indexOf("\"" + key + "\":");
-      if (idx == -1) return -1;
-      int start = idx + key.length() + 2;
-      while (start < src.length() && (src[start] == ' ' || src[start] == ':')) start++;
-      int end = start;
-      while (end < src.length() && (isdigit(src[end]))) end++;
-      return src.substring(start, end).toInt();
-    };
-
-    String newName = extractStr(body, "roomName");
-    String newCode = extractStr(body, "roomCode");
-    String newBld  = extractStr(body, "building");
-    int newFloor   = extractInt(body, "floor");
-    int newVol     = extractInt(body, "volume");
-    int sH         = extractInt(body, "wStartH");
-    int sM         = extractInt(body, "wStartM");
-    int eH         = extractInt(body, "wEndH");
-    int eM         = extractInt(body, "wEndM");
-    bool schedEn   = (body.indexOf("\"wSchedEn\":true") != -1);
-
-    if (newName.length() > 0) newName.toCharArray(nodeConfig.roomName, sizeof(nodeConfig.roomName));
-    if (newCode.length() > 0) newCode.toCharArray(nodeConfig.roomCode, sizeof(nodeConfig.roomCode));
-    if (newBld.length() > 0)  newBld.toCharArray(nodeConfig.building, sizeof(nodeConfig.building));
-    if (newFloor >= 0) nodeConfig.floor = newFloor;
-    if (newVol >= 0 && newVol <= 100) nodeConfig.volume = newVol;
-    if (sH >= 0 && sH <= 23) nodeConfig.wifiStartHour = sH;
-    if (sM >= 0 && sM <= 59) nodeConfig.wifiStartMin = sM;
-    if (eH >= 0 && eH <= 23) nodeConfig.wifiEndHour = eH;
-    if (eM >= 0 && eM <= 59) nodeConfig.wifiEndMin = eM;
-    nodeConfig.wifiScheduleEnabled = schedEn;
-
-    dbSaveConfig();
+    processSavePayload(server.arg("plain"));
     server.send(200, "application/json", "{\"ok\":true}");
     return;
   }
   server.send(400, "application/json", "{\"error\":\"Invalid payload\"}");
 }
 
+#elif defined(ARDUINO_UNOR4_WIFI)
+static void handleUnoClient(WiFiClient& client) {
+  unsigned long start = millis();
+  while (!client.available() && millis() - start < 1000) {
+    delay(5);
+  }
+  if (!client.available()) {
+    client.stop();
+    return;
+  }
+
+  String reqLine = client.readStringUntil('\r');
+  if (client.peek() == '\n') client.read();
+
+  int contentLen = 0;
+  while (client.connected()) {
+    String header = client.readStringUntil('\r');
+    if (client.peek() == '\n') client.read();
+    if (header.length() == 0) break;
+    if (header.startsWith("Content-Length: ")) {
+      contentLen = header.substring(16).toInt();
+    }
+  }
+
+  String body = "";
+  if (contentLen > 0) {
+    for (int i = 0; i < contentLen && client.available(); i++) {
+      body += (char)client.read();
+    }
+  }
+
+  if (reqLine.startsWith("GET / ") || reqLine.startsWith("GET /index.html")) {
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-Type: text/html");
+    client.println("Connection: close");
+    client.println();
+    client.print(reinterpret_cast<const __FlashStringHelper*>(HTML_CONFIG_PAGE));
+  } else if (reqLine.startsWith("GET /api/status")) {
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-Type: application/json");
+    client.println("Connection: close");
+    client.println();
+    client.println(getStatusJson());
+  } else if (reqLine.startsWith("POST /api/test_sound")) {
+    playAcousticBeacon();
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-Type: application/json");
+    client.println("Connection: close");
+    client.println();
+    client.println("{\"ok\":true}");
+  } else if (reqLine.startsWith("POST /api/save")) {
+    processSavePayload(body);
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-Type: application/json");
+    client.println("Connection: close");
+    client.println();
+    client.println("{\"ok\":true}");
+  } else {
+    client.println("HTTP/1.1 404 Not Found");
+    client.println("Content-Type: text/plain");
+    client.println("Connection: close");
+    client.println();
+    client.println("Not Found");
+  }
+
+  delay(5);
+  client.stop();
+}
+#endif
+
 void startWifiService(bool isManual) {
   if (isWifiActive && serverRunning) return;
 
   addLog("WIFI", isManual ? "Iniciando Wi-Fi (Manual)" : "Iniciando Wi-Fi (Horario 07:00 - 20:30)...");
 
-  // Modo AP + STA para permitir conexión a red del instituto y punto de acceso de respaldo
   String apSSID = "Guiak-Node-" + String(nodeConfig.roomCode);
+
+#if defined(ESP32)
+  // Modo AP + STA para permitir conexión a red del instituto y punto de acceso de respaldo
   WiFi.mode(WIFI_AP_STA);
   WiFi.softAP(apSSID.c_str(), "guiak1234");
 
@@ -411,15 +508,23 @@ void startWifiService(bool isManual) {
     WiFi.begin(nodeConfig.wifiSSID, nodeConfig.wifiPassword);
   }
 
-  // Activar Wi-Fi Modem Sleep para reducir el consumo hasta 15-20 mA mientras está conectado
   esp_wifi_set_ps(WIFI_PS_MIN_MODEM);
 
   server.on("/", HTTP_GET, handleRoot);
   server.on("/api/status", HTTP_GET, handleStatus);
   server.on("/api/test_sound", HTTP_POST, handleTestSound);
   server.on("/api/save", HTTP_POST, handleSave);
-
   server.begin();
+
+#elif defined(ARDUINO_UNOR4_WIFI)
+  if (strlen(nodeConfig.wifiSSID) > 0) {
+    WiFi.begin(nodeConfig.wifiSSID, nodeConfig.wifiPassword);
+  } else {
+    WiFi.beginAP(apSSID.c_str(), "guiak1234");
+  }
+  server.begin();
+#endif
+
   serverRunning = true;
   isWifiActive = true;
   isConfigMode = true;
@@ -429,7 +534,6 @@ void startWifiService(bool isManual) {
     manualOverrideStart = millis();
   }
 
-  // Sincronizar reloj por NTP si hay conexión a internet
   ntpSync();
 }
 
@@ -439,13 +543,19 @@ void stopWifiService() {
   addLog("WIFI", "Apagando Wi-Fi por horario nocturno (Ahorro de bateria)");
 
   if (serverRunning) {
+#if defined(ESP32)
     server.stop();
+#endif
     serverRunning = false;
   }
 
+#if defined(ESP32)
   WiFi.softAPdisconnect(true);
   WiFi.disconnect(true);
   WiFi.mode(WIFI_OFF);
+#elif defined(ARDUINO_UNOR4_WIFI)
+  WiFi.disconnect();
+#endif
 
   isWifiActive = false;
   isConfigMode = false;
@@ -453,7 +563,6 @@ void stopWifiService() {
 }
 
 void wifiServiceInit() {
-  // Comprobar si debemos arrancar el Wi-Fi según el horario escolar
   if (isWithinWifiSchedule()) {
     startWifiService(false);
   } else {
@@ -462,20 +571,26 @@ void wifiServiceInit() {
 }
 
 void handleWifiService() {
+#if defined(ESP32)
   if (isWifiActive && serverRunning) {
     server.handleClient();
   }
+#elif defined(ARDUINO_UNOR4_WIFI)
+  if (isWifiActive && serverRunning) {
+    WiFiClient client = server.available();
+    if (client) {
+      handleUnoClient(client);
+    }
+  }
+#endif
 
-  // Revisión periódica de la ventana horaria (07:00 a 20:30)
   if (millis() - lastScheduleCheck > SCHEDULE_CHECK_INTERVAL) {
     lastScheduleCheck = millis();
 
     if (isManualWifiOverride) {
-      // Si se encendió manualmente por botón, comprobar temporizador (ej: 5 min)
       unsigned long timeoutMs = (unsigned long)nodeConfig.configTimeoutSec * 1000UL;
       if (millis() - manualOverrideStart > timeoutMs) {
         isManualWifiOverride = false;
-        // Volver a evaluar el horario
         if (!isWithinWifiSchedule()) {
           stopWifiService();
         }

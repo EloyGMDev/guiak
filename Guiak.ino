@@ -25,6 +25,11 @@
 #include "firebase_client.h"
 #include "component_detector.h"
 
+#if defined(ARDUINO_UNOR4_WIFI)
+#include <ArduinoBLE.h>
+#include <WiFiS3.h>
+#endif
+
 static unsigned long lastBatteryCheck = 0;
 const unsigned long BATTERY_CHECK_INTERVAL = 30000; // Cada 30 segundos
 
@@ -32,7 +37,11 @@ void setup() {
   Serial.begin(115200);
   delay(300);
 
+#if defined(ARDUINO_UNOR4_WIFI)
+  addLog("SISTEMA", "Iniciando Guiak Node v" + String(FW_VERSION) + " en Arduino UNO R4 WiFi...");
+#else
   addLog("SISTEMA", "Iniciando Guiak Node v" + String(FW_VERSION) + " en ESP32-S3...");
+#endif
 
   // 1. Inicializar almacenamiento persistente NVS
   dbInit();

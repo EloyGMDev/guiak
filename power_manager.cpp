@@ -1,12 +1,17 @@
 #include "power_manager.h"
 #include "config.h"
+
+#if defined(ESP32)
 #include "esp_sleep.h"
 #include "esp_adc_cal.h"
+#endif
 
 void powerInit() {
-  // Configuración del ADC para lectura de batería en ESP32-S3
+  // Configuración del ADC para lectura de batería
   analogReadResolution(12); // 0 a 4095
+#if defined(ESP32)
   analogSetAttenuation(ADC_11db); // Rango de hasta ~3.1V en el pin
+#endif
   pinMode(BATTERY_ADC_PIN, INPUT);
   
   // Primera lectura de arranque
@@ -57,6 +62,7 @@ bool isBatteryLow() {
 void enterLightSleep(uint32_t durationMs) {
   if (durationMs == 0) return;
   
+#if defined(ESP32)
   // Configurar timer de despertar
   esp_sleep_enable_timer_wakeup((uint64_t)durationMs * 1000ULL);
   
@@ -65,4 +71,7 @@ void enterLightSleep(uint32_t durationMs) {
 
   // Entrar en Light Sleep (mantiene memoria RAM y variables)
   esp_light_sleep_start();
+#else
+  delay(durationMs);
+#endif
 }

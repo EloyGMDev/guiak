@@ -4,6 +4,7 @@
 #include "audio_manager.h"
 #include "web_server.h"
 #include "firebase_client.h"
+#include "utils.h"
 #include <SPI.h>
 
 MFRC522 mfrc522(RFID_SS_PIN, RFID_RST_PIN);
