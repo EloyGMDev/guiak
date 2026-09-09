@@ -88,6 +88,9 @@ void setup() {
 }
 
 void loop() {
+  // 0. Procesar eventos Bluetooth en tiempo real con latencia cero
+  bleLoop();
+
   // 1. Comprobar pulsación del botón físico (conmutar Wi-Fi manual)
   checkConfigButton();
 
@@ -115,6 +118,6 @@ void loop() {
   // 6. Supervisión y detección continua de componentes
   checkComponentHealthLoop();
 
-  // 7. Pequeño descanso en el bucle
-  delay(15);
+  // 7. Ceder ciclo de CPU sin retardos perceptibles
+  delay(1);
 }

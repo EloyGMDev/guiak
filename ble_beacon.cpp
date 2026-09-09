@@ -215,8 +215,8 @@ void bleBeaconInit() {
   String infoPayload = String(nodeConfig.roomName) + "|" + String(nodeConfig.roomCode) + "|" + String(nodeConfig.floor);
   r4InfoChar.writeValue(infoPayload.c_str());
 
-  // Intervalo de anuncio de alta precisión: 240 unidades de 0.625 ms = 150 ms (~6.6 Hz)
-  BLE.setAdvertisingInterval(240);
+  // Intervalo de anuncio ultra-rápido: 160 unidades de 0.625 ms = 100 ms (10 Hz) para respuesta instantánea
+  BLE.setAdvertisingInterval(160);
 
   BLE.advertise();
   addLog("BLE", "Baliza Bluetooth UNO R4 transmitiendo como: " + advName + " (Servicio 0xFD00)");
@@ -239,6 +239,7 @@ void bleStart() {
 
 void bleLoop() {
   if (!isBleAvailable) return;
+  BLE.poll(); // Procesa inmediatamente paquetes de radio y escrituras GATT entrantes sin retardo
   BLEDevice central = BLE.central();
   if (central && central.connected()) {
     if (r4TriggerChar.written()) {
