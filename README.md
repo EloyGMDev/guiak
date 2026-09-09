@@ -10,6 +10,8 @@
 
 <p align="center">
   <a href="https://guiak.com"><img src="https://img.shields.io/badge/Website-guiak.com-00C49F?style=for-the-badge" alt="Website" /></a>
+  &nbsp;&nbsp;
+  <a href="./apk/guiak-app-v3.0.apk"><img src="https://img.shields.io/badge/Android_App-Download_APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download Android APK" /></a>
 </p>
 
 ---
@@ -56,7 +58,7 @@ By offloading device management, schedules, and logging directly to **Firebase R
 - **Offline Resilience Event Buffer:** If institutional Wi-Fi drops, RFID card reads and navigation logs are preserved in an in-memory circular buffer and automatically flushed to Firebase once network connectivity returns.
 - **Remote Cloud Command Dispatcher:** Facility administrators can trigger sound pulses remotely, toggle school-wide safety lockdowns, or query node telemetry directly from the Firebase console.
 - **Harmonic Acoustic Wayfinding:** Multi-tone harmonic chime envelopes mathematically optimized for spatial human echolocation without jarring acoustic distortion.
-- **Smart Operational Schedule (07:00 - 20:30):** Automatic Wi-Fi Modem Sleep during school hours and deep peripheral shutdown at night to conserve power.
+- **Smart Operational Schedule (06:30 - 20:30):** Automatic Wi-Fi Modem Sleep during school hours and deep peripheral shutdown at night to conserve power.
 - **Hardware Watchdog Guard:** Automatic hardware recovery in the event of peripheral timeouts or network stack hangs.
 - **Automated Component Detection & Failover Alarm:** POST self-test and continuous background watchdog verifying all modules (RFID, battery ADC, BLE, NVS). If any component is missing or fails to respond, it triggers a **5-second dissonant alarm melody** prioritizing: **Buzzer** &rarr; **Speaker** (I2S/DAC) &rarr; **Status LEDs** (high-visibility strobe).
 
@@ -109,6 +111,21 @@ By offloading device management, schedules, and logging directly to **Firebase R
       └── lastSeen.json       <-- Last detected room, floor, timestamp, and method (BLE/RFID)
 ```
 
+---
+
+### 5. Guiak Mobile App for Android (Download APK)
+**Guiak** includes an official Android companion application designed specifically for blind and visually impaired students navigating educational centers.
+
+- **Direct Download:** [`apk/guiak-app-v3.0.apk`](./apk/guiak-app-v3.0.apk) (Ready to install on Android 8.0+).
+- **Language Note:** *Currently, the mobile application user interface, synthetic voice prompts, and accessibility announcements are available exclusively in **Spanish (Castellano)**. Multilingual support (Catalan and English) is planned for upcoming releases.*
+
+#### Key Mobile Features:
+1. **100% TalkBack Native:** Complete semantic accessibility labels on every card, button, and indicator, designed for intuitive one-handed navigation while holding a white cane.
+2. **"¿Dónde estoy?" Voice Assistance:** Tap anywhere on the high-contrast button to hear your current location, nearest classroom, floor, and estimated distance read aloud via text-to-speech.
+3. **Giant "Hacer sonar puerta" Trigger:** A high-contrast yellow button that instantly triggers the physical node's acoustic orientation pulse on the doorframe via Bluetooth GATT with sub-second latency.
+4. **Proximity Audio Radar:** Progressive acoustic sonar beeps that increase in tempo as the student approaches the classroom door.
+5. **Classroom Arrival Confirmation:** Send attendance confirmation to the door node either via the app button or automatic beacon proximity.
+
 </details>
 
 ---
@@ -131,7 +148,7 @@ Al centralizar la gestion, los horarios y los registros en **Firebase Realtime D
 - **Cola de Eventos Fuera de Linea (Buffer Offline):** Si la red Wi-Fi escolar se interrumpe temporalmente, los fichajes RFID y las activaciones acusticas se conservan en un buffer circular en memoria y se transmiten automaticamente a Firebase al recuperar la conexion.
 - **Despachador Remoto de Ordenes:** El equipo directivo puede activar la baliza acustica a distancia, activar el modo de confinamiento escolar de emergencia (lockdown) o consultar la telemetria en tiempo real desde Firebase.
 - **Pulsos de Ecolocalizacion Armonica:** Secuencias de tonos con envolvente suave disenadas para una optima orientacion espacial tridimensional sin provocar sobresaltos auditivos.
-- **Horario Inteligente (07:00 a 20:30):** Modo Wi-Fi Modem Sleep activo durante la jornada lectiva y apagado profundo nocturno para maximizar la autonomia.
+- **Horario Inteligente (06:30 a 20:30):** Modo Wi-Fi Modem Sleep activo durante la jornada lectiva y apagado profundo nocturno para maximizar la autonomia.
 - **Watchdog de Hardware:** Reinicio preventivo automatico ante posibles excepciones en la pila de red o perifericos.
 - **Sistema de Deteccion de Componentes y Alarma Failover:** Autodiagnostico POST en el arranque y vigilancia continua en bucle de todos los modulos (RFID MFRC522, ADC de bateria, BLE y NVS). Si falta un componente o no responde, dispara una **alarma de 5 segundos con melodia disonante ("chunga")** con jerarquia: **Buzzer** &rarr; **Altavoz** (I2S/DAC) &rarr; **LEDs de estado** (destello de emergencia).
 
@@ -149,6 +166,22 @@ Al centralizar la gestion, los horarios y los registros en **Firebase Realtime D
 - `/nodes/{roomCode}/presence/{studentId}.json`: Registro de estudiantes detectados en el aula.
 - `/nodes/{roomCode}/logs/`: Historico cronologico de accesos RFID y eventos de navegacion.
 - `/students/{studentId}/lastSeen.json`: Ultima aula detectada para el alumno, planta, fecha/hora y metodo (BLE/RFID).
+
+---
+
+### 5. Aplicacion Movil Guiak para Android (Descarga de APK)
+El ecosistema **Guiak** incluye una aplicacion movil oficial para Android desarrollada especificamente para estudiantes con ceguera o baja vision.
+
+- **Descarga directa:** [`apk/guiak-app-v3.0.apk`](./apk/guiak-app-v3.0.apk) (Archivo APK listo para instalar en Android 8.0 o superior).
+- **Nota de idioma:** *Actualmente, la aplicacion movil, sus locuciones por voz (TTS) y todos los textos de la interfaz estan disponibles **unicamente en castellano**. En futuras versiones se incorporaran traducciones al catalan y al ingles.*
+
+#### Funcionalidades Principales de la App:
+1. **Accesibilidad Total con TalkBack:** Botones gigantes de alto contraste (negro puro, amarillo trafico `#FFD700` y cyan `#00E5FF`) y etiquetas semanticas completas, optimizadas para su manejo con una sola mano mientras se camina con baston.
+2. **Boton "¿Donde estoy?" (Repetir voz):** Pulsa la pantalla para que la sintesis de voz te anuncie al instante el aula mas cercana, la planta del edificio y los metros de distancia estimados.
+3. **Boton gigante "HACER SONAR PUERTA":** Activa de forma inmediata el zumbador o altavoz fisico instalado en el marco de la puerta del aula mediante Bluetooth GATT para orientarse por ecolocalizacion.
+4. **Radar Sonoro de Proximidad:** Emite pitidos de sonar que aumentan su cadencia a medida que la persona se acerca a la puerta.
+5. **Confirmacion de Llegada:** Permite confirmar la entrada al aula y registrar la asistencia directamente en Firebase.
+6. **Emisor de Baliza del Alumno:** Convierte el smartphone en una baliza emisora para que las puertas detecten la llegada del alumno automaticamente.
 
 </details>
 
@@ -172,7 +205,7 @@ En centralitzar la gestio, els horaris i els registres a **Firebase Realtime Dat
 - **Cua d Esdeveniments Fora de Linia (Buffer Offline):** Si el Wi-Fi cau, els accessos RFID es guarden a la memoria local i es transmeten automaticament a Firebase en recuperar la connexio.
 - **Despatxador Remot d Ordres:** Possibilitat d activar el so de l aula a distancia o ordenar un tancament d emergencia des de la consola central.
 - **Polsos d Ecolocalitzacio Acustica:** Sons harmonics suaus optimitzats per a orientacio auditiva espacial sense estridencies.
-- **Horari Intelligent (07:00 a 20:30):** Wi-Fi actiu en horari lectiu i desconnexio profunda nocturna per a la preservacio de la bateria.
+- **Horari Intelligent (06:30 a 20:30):** Wi-Fi actiu en horari lectiu i desconnexio profunda nocturna per a la preservacio de la bateria.
 - **Watchdog de Maquinari:** Recuperacio automatica davant fallades de xarxa o periferics.
 - **Sistema de Deteccio de Components i Alarma Failover:** Autodiagnosi POST a l arrancada i vigilancia continua en bucle de tots els moduls (RFID MFRC522, ADC de bateria, BLE i NVS). Si falta un component o no respon, dispara una **alarma de 5 segons amb melodia dissonant ("xunga")** amb jerarquia: **Buzzer** &rarr; **Altveu** (I2S/DAC) &rarr; **LEDs d estat** (parpelleig d emergencia).
 
@@ -190,6 +223,21 @@ En centralitzar la gestio, els horaris i els registres a **Firebase Realtime Dat
 - `/nodes/{roomCode}/presence/{studentId}.json`: Estudiants detectats a l aula.
 - `/nodes/{roomCode}/logs/`: Registre cronologic d accessos RFID i balises de navegacio.
 - `/students/{studentId}/lastSeen.json`: Ultima aula detectada per a l alumne, planta, data/hora i metode (BLE/RFID).
+
+---
+
+### 5. Aplicacio Mobil Guiak per a Android (Descarrega d'APK)
+L'ecosistema **Guiak** inclou una aplicacio mobil oficial per a Android desenvolupada especificament per a estudiants amb discapacitat visual o baixa visio.
+
+- **Descarrega directa:** [`apk/guiak-app-v3.0.apk`](./apk/guiak-app-v3.0.apk) (Fitxer APK llest per a installar en Android 8.0 o superior).
+- **Nota d'idioma:** *Actualment, l'aplicacio mobil, les seves locucions per veu (TTS) i tots els textos de la interficie estan disponibles **unicament en castella**. En futures versions s'incorporaran traduccions al catala i a l'angles.*
+
+#### Funcionalitats Principals de l'App:
+1. **Accessibilitat Total amb TalkBack:** Botons gegants d'alt contrast (negre pur, groc transit `#FFD700` i cian `#00E5FF`) i etiquetes semantiques completes pensades per a utilitzar amb una sola ma mentre es camina amb basto.
+2. **Boto "¿Donde estoy?" (Repetir veu):** Toca la pantalla per a escoltar per sintesi de veu l'aula mes propera, la planta i la distancia estimada.
+3. **Boto gegant "HACER SONAR PUERTA":** Activa a l'instant el pols acustic del marc de la porta via Bluetooth GATT per a orientar-se per ecolocalitzacio.
+4. **Radar Sonor de Proximitat:** Emet xiulets continus que acceleren com mes a prop estiguis de la porta.
+5. **Confirmacio d'Arribada:** Confirma l'entrada a l'aula i registra la presencia a Firebase.
 
 </details>
 
