@@ -48,7 +48,7 @@
 //  PARÁMETROS DE BALIZA BLUETOOTH (iBeacon / Guiak)
 // ════════════════════════════════════════════════════════════════
 #define DEFAULT_BEACON_UUID "FDA50693-A4E2-4FB1-AFCF-C6EB07647825"
-#define DEFAULT_ADV_INTERVAL_MS 500  // Anuncio cada 500 ms
+#define DEFAULT_ADV_INTERVAL_MS 150  // Anuncio a alta frecuencia (150 ms = ~6.6 Hz) para máxima precisión
 #define BEACON_MEASURED_POWER   -59  // Calibración RSSI a 1 metro
 
 // ════════════════════════════════════════════════════════════════

@@ -212,6 +212,9 @@ void bleBeaconInit() {
   String infoPayload = String(nodeConfig.roomName) + "|" + String(nodeConfig.roomCode) + "|" + String(nodeConfig.floor);
   r4InfoChar.writeValue(infoPayload.c_str());
 
+  // Intervalo de anuncio de alta precisión: 240 unidades de 0.625 ms = 150 ms (~6.6 Hz)
+  BLE.setAdvertisingInterval(240);
+
   BLE.advertise();
 }
 
