@@ -79,7 +79,8 @@ class TriggerCallbacks : public BLECharacteristicCallbacks {
 };
 
 void bleBeaconInit() {
-  BLEDevice::init(nodeConfig.roomCode);
+  String advName = "Guiak-" + String(nodeConfig.roomCode);
+  BLEDevice::init(advName.c_str());
   isBleAvailable = true;
   esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P6);
 
@@ -196,7 +197,9 @@ void bleBeaconInit() {
   }
   isBleAvailable = true;
 
-  BLE.setLocalName(nodeConfig.roomCode);
+  String advName = "Guiak-" + String(nodeConfig.roomCode);
+  BLE.setDeviceName(advName.c_str());
+  BLE.setLocalName(advName.c_str());
   BLE.setAdvertisedService(r4SonaService);
 
   r4SonaService.addCharacteristic(r4TriggerChar);
@@ -216,6 +219,7 @@ void bleBeaconInit() {
   BLE.setAdvertisingInterval(240);
 
   BLE.advertise();
+  addLog("BLE", "Baliza Bluetooth UNO R4 transmitiendo como: " + advName + " (Servicio 0xFD00)");
 }
 
 void bleUpdateBatteryLevel(uint8_t percent) {
