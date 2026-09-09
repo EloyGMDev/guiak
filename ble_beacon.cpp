@@ -240,8 +240,10 @@ void bleStart() {
 void bleLoop() {
   if (!isBleAvailable) return;
   BLE.poll(); // Procesa inmediatamente paquetes de radio y escrituras GATT entrantes sin retardo
+  static bool wasConnected = false;
   BLEDevice central = BLE.central();
   if (central && central.connected()) {
+    wasConnected = true;
     if (r4TriggerChar.written()) {
       int len = r4TriggerChar.valueLength();
       const uint8_t* val = r4TriggerChar.value();
@@ -273,6 +275,9 @@ void bleLoop() {
         }
       }
     }
+  } else if (wasConnected) {
+    wasConnected = false;
+    BLE.advertise(); // Reanudar inmediatamente los paquetes de baliza al desconectarse el móvil
   }
 }
 
