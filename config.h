@@ -49,7 +49,7 @@
 // ════════════════════════════════════════════════════════════════
 #define DEFAULT_BEACON_UUID "FDA50693-A4E2-4FB1-AFCF-C6EB07647825"
 #define DEFAULT_ADV_INTERVAL_MS 100  // Anuncio a alta frecuencia (100 ms = 10 Hz) para respuesta instantánea sin delay
-#define BEACON_MEASURED_POWER   -59  // Calibración RSSI a 1 metro
+#define BEACON_MEASURED_POWER   -64  // Calibración RSSI a 1 metro para antena PCB
 
 // ════════════════════════════════════════════════════════════════
 //  COLA DE EVENTOS OFFLINE (RESILIENCIA SIN CONEXIÓN)
