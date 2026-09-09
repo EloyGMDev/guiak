@@ -23,6 +23,7 @@
 #include "hardware_io.h"
 #include "web_server.h"
 #include "firebase_client.h"
+#include "component_detector.h"
 
 static unsigned long lastBatteryCheck = 0;
 const unsigned long BATTERY_CHECK_INTERVAL = 30000; // Cada 30 segundos
@@ -44,7 +45,6 @@ void setup() {
 
   // 3. Inicializar subsistema de audio digital I2S
   audioInit();
-  playArrivalChime(); // Tono armónico de arranque
 
   // 4. Inicializar periféricos (Botón de configuración y Lector RFID)
   hardwareInit();
@@ -53,7 +53,18 @@ void setup() {
   bleBeaconInit();
   addLog("BLE", "Baliza iBeacon activa (Intervalo: " + String(nodeConfig.advIntervalMs) + " ms)");
 
-  // 6. Arrancar servicio Wi-Fi según el horario escolar (07:00 a 20:30)
+  // 6. Autodiagnóstico y Detección de Componentes Hardware (POST)
+  componentDetectorInit();
+  ComponentReport compReport = runComponentSelfTest();
+  if (!compReport.allCriticalOk) {
+    // Si falta algún componente crítico, dispara la alarma de 5 segundos (Buzzer -> Altavoz -> LEDs)
+    triggerComponentFailureAlarm(compReport);
+  } else {
+    // Si todos los componentes están saludables, emite el tono armónico de bienvenida
+    playArrivalChime();
+  }
+
+  // 7. Arrancar servicio Wi-Fi según el horario escolar (07:00 a 20:30)
   // Si el botón físico está pulsado en el arranque, forzar encendido manual inmediato
   if (digitalRead(BTN_CONFIG_PIN) == LOW) {
     addLog("SISTEMA", "Boton presionado al arrancar -> Forzando Wi-Fi manual...");
@@ -78,7 +89,7 @@ void loop() {
   // 4. Escuchar tarjetas RFID de paso
   handleRFID();
 
-  // 4. Monitorización periódica del nivel de batería
+  // 5. Monitorización periódica del nivel de batería
   if (millis() - lastBatteryCheck > BATTERY_CHECK_INTERVAL) {
     lastBatteryCheck = millis();
     updateBatteryStatus();
@@ -90,6 +101,9 @@ void loop() {
     }
   }
 
-  // 5. Pequeño descanso en el bucle
+  // 6. Supervisión y detección continua de componentes
+  checkComponentHealthLoop();
+
+  // 7. Pequeño descanso en el bucle
   delay(15);
 }

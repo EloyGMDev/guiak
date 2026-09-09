@@ -40,6 +40,8 @@ void dbResetDefaults() {
   strncpy(nodeConfig.firebaseHost, "https://guiak-default-rtdb.firebaseio.com", sizeof(nodeConfig.firebaseHost) - 1);
   strncpy(nodeConfig.firebaseAuth, "", sizeof(nodeConfig.firebaseAuth) - 1);
   nodeConfig.firebaseEnabled = true;
+  nodeConfig.hasBuzzer = true;
+  nodeConfig.hasSpeaker = true;
 
   dbSaveConfig();
   prefs.putBool("initialized", true);
@@ -68,6 +70,8 @@ void dbLoadConfig() {
   prefs.getString("fbHost", nodeConfig.firebaseHost, sizeof(nodeConfig.firebaseHost));
   prefs.getString("fbAuth", nodeConfig.firebaseAuth, sizeof(nodeConfig.firebaseAuth));
   nodeConfig.firebaseEnabled = prefs.getBool("fbEn", true);
+  nodeConfig.hasBuzzer = prefs.getBool("hasBuzzer", true);
+  nodeConfig.hasSpeaker = prefs.getBool("hasSpeaker", true);
 }
 
 void dbSaveConfig() {
@@ -93,6 +97,8 @@ void dbSaveConfig() {
   prefs.putString("fbHost", nodeConfig.firebaseHost);
   prefs.putString("fbAuth", nodeConfig.firebaseAuth);
   prefs.putBool("fbEn", nodeConfig.firebaseEnabled);
+  prefs.putBool("hasBuzzer", nodeConfig.hasBuzzer);
+  prefs.putBool("hasSpeaker", nodeConfig.hasSpeaker);
 }
 
 void dbIncrementAccessCount() {

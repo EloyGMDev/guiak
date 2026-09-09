@@ -58,6 +58,7 @@ By offloading device management, schedules, and logging directly to **Firebase R
 - **Harmonic Acoustic Wayfinding:** Multi-tone harmonic chime envelopes mathematically optimized for spatial human echolocation without jarring acoustic distortion.
 - **Smart Operational Schedule (07:00 - 20:30):** Automatic Wi-Fi Modem Sleep during school hours and deep peripheral shutdown at night to conserve power.
 - **Hardware Watchdog Guard:** Automatic hardware recovery in the event of peripheral timeouts or network stack hangs.
+- **Automated Component Detection & Failover Alarm:** POST self-test and continuous background watchdog verifying all modules (RFID, battery ADC, BLE, NVS). If any component is missing or fails to respond, it triggers a **5-second dissonant alarm melody** prioritizing: **Buzzer** &rarr; **Speaker** (I2S/DAC) &rarr; **Status LEDs** (high-visibility strobe).
 
 ---
 
@@ -78,6 +79,7 @@ By offloading device management, schedules, and logging directly to **Firebase R
 | **Sensors & I/O** | Battery Voltage Divider | **GPIO 4** | ADC1_CH3 (3.3V scaled) |
 | | Hardware Test Button | **GPIO 0** | Pulled-up active LOW |
 | | Status Indicator LED | **GPIO 48** | On-board addressable RGB / LED |
+| | Piezo Buzzer (Alarm) | **GPIO 47** | Diagnostic failover alert output |
 
 #### Arduino UNO R4 WiFi
 | Peripheral | Function | Board Pin | Notes |
@@ -131,6 +133,7 @@ Al centralizar la gestion, los horarios y los registros en **Firebase Realtime D
 - **Pulsos de Ecolocalizacion Armonica:** Secuencias de tonos con envolvente suave disenadas para una optima orientacion espacial tridimensional sin provocar sobresaltos auditivos.
 - **Horario Inteligente (07:00 a 20:30):** Modo Wi-Fi Modem Sleep activo durante la jornada lectiva y apagado profundo nocturno para maximizar la autonomia.
 - **Watchdog de Hardware:** Reinicio preventivo automatico ante posibles excepciones en la pila de red o perifericos.
+- **Sistema de Deteccion de Componentes y Alarma Failover:** Autodiagnostico POST en el arranque y vigilancia continua en bucle de todos los modulos (RFID MFRC522, ADC de bateria, BLE y NVS). Si falta un componente o no responde, dispara una **alarma de 5 segundos con melodia disonante ("chunga")** con jerarquia: **Buzzer** &rarr; **Altavoz** (I2S/DAC) &rarr; **LEDs de estado** (destello de emergencia).
 
 ---
 
@@ -171,6 +174,7 @@ En centralitzar la gestio, els horaris i els registres a **Firebase Realtime Dat
 - **Polsos d Ecolocalitzacio Acustica:** Sons harmonics suaus optimitzats per a orientacio auditiva espacial sense estridencies.
 - **Horari Intelligent (07:00 a 20:30):** Wi-Fi actiu en horari lectiu i desconnexio profunda nocturna per a la preservacio de la bateria.
 - **Watchdog de Maquinari:** Recuperacio automatica davant fallades de xarxa o periferics.
+- **Sistema de Deteccio de Components i Alarma Failover:** Autodiagnosi POST a l arrancada i vigilancia continua en bucle de tots els moduls (RFID MFRC522, ADC de bateria, BLE i NVS). Si falta un component o no respon, dispara una **alarma de 5 segons amb melodia dissonant ("xunga")** amb jerarquia: **Buzzer** &rarr; **Altveu** (I2S/DAC) &rarr; **LEDs d estat** (parpelleig d emergencia).
 
 ---
 

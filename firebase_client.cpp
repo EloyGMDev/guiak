@@ -3,6 +3,7 @@
 #include "database.h"
 #include "audio_manager.h"
 #include "power_manager.h"
+#include "component_detector.h"
 #include "utils.h"
 
 #include <WiFi.h>
@@ -200,6 +201,8 @@ void firebaseUpdateStatus() {
   if (https.begin(client, url)) {
     https.addHeader("Content-Type", "application/json");
 
+    ComponentReport rep = getLastComponentReport();
+
     String payload = "{";
     payload += "\"online\":true,";
     payload += "\"roomName\":\"" + String(nodeConfig.roomName) + "\",";
@@ -208,6 +211,8 @@ void firebaseUpdateStatus() {
     payload += "\"mv\":" + String(batteryMillivolts) + ",";
     payload += "\"rssi\":" + String(WiFi.RSSI()) + ",";
     payload += "\"lockdown\":" + String(lockdownMode ? "true" : "false") + ",";
+    payload += "\"componentsOk\":" + String(rep.allCriticalOk ? "true" : "false") + ",";
+    payload += "\"rfidOk\":" + String(rep.rfidOk ? "true" : "false") + ",";
     payload += "\"uptime\":" + String(millis() / 1000);
     payload += "}";
 
@@ -315,6 +320,15 @@ void firebaseCheckCommands() {
           lockdownMode = false;
           playSuccessChime();
           firebasePushLog("SEGURIDAD", "Bloqueo de emergencia DESACTIVADO", LOG_INFO);
+        } else if (cmd == "test_alarm" || cmd == "test_component_alarm") {
+          firebasePushLog("TEST", "Disparando prueba remota de alarma de componentes (5s)");
+          playOminousAlarm(5000);
+        } else if (cmd == "selftest") {
+          ComponentReport rep = runComponentSelfTest();
+          firebasePushLog("TEST", "Self-test manual: " + String(rep.allCriticalOk ? "OK" : rep.missingSummary));
+          if (!rep.allCriticalOk) {
+            triggerComponentFailureAlarm(rep);
+          }
         } else if (cmd == "reboot") {
           firebasePushLog("SISTEMA", "Reinicio remoto solicitado");
           delay(500);

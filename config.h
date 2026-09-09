@@ -25,6 +25,7 @@
   #define I2S_LRC_PIN        16    // Word Select (LRC)
   #define I2S_DIN_PIN        17    // Serial Data In (DIN)
   #define I2S_SD_PIN         18    // Shutdown amplificador (LOW = 0µA Sleep)
+  #define BUZZER_PIN         47    // Pin alternativo para buzzer piezoeléctrico
   #define RFID_SS_PIN        10    // Slave Select (SDA)
   #define RFID_RST_PIN       9     // Reset
   #define RFID_SCK_PIN       12    // SPI Clock
@@ -92,7 +93,17 @@ struct NodeConfig {
   char     firebaseHost[96];    // URL de Firebase Realtime Database
   char     firebaseAuth[64];    // Auth token / secreto
   bool     firebaseEnabled;     // True = sincronizar con Firebase
+
+  // ── ACTUADORES Y HARDWARE DISPONIBLE ───────
+  bool     hasBuzzer;           // True = zumbador/buzzer piezoeléctrico disponible
+  bool     hasSpeaker;          // True = altavoz (I2S MAX98357A / DAC) disponible
 };
+
+// ════════════════════════════════════════════════════════════════
+//  PARÁMETROS DEL SISTEMA DE DETECCIÓN Y DIAGNÓSTICO
+// ════════════════════════════════════════════════════════════════
+#define COMPONENT_CHECK_INTERVAL_MS  20000 // Comprobación en bucle cada 20 segundos
+#define COMPONENT_ALARM_DURATION_MS  5000  // Alarma de 5 segundos si falta algún componente
 
 // ════════════════════════════════════════════════════════════════
 //  ESTADO Y VARIABLES GLOBALES

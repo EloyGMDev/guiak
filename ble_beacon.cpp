@@ -2,6 +2,7 @@
 #include "config.h"
 #include "audio_manager.h"
 #include "firebase_client.h"
+#include "component_detector.h"
 
 #include <BLEDevice.h>
 #include <BLEServer.h>
@@ -72,6 +73,9 @@ class TriggerCallbacks : public BLECharacteristicCallbacks {
       } else if (cmd == 2 || cmd == '2') {
         // Disparo de confirmación de llegada
         playArrivalChime();
+      } else if (cmd == 3 || cmd == '3') {
+        // Disparo de prueba de alarma de componentes (5 segundos)
+        playOminousAlarm(5000);
       }
     }
   }

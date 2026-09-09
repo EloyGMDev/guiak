@@ -97,3 +97,13 @@ void handleRFID() {
   mfrc522.PICC_HaltA();
   mfrc522.PCD_StopCrypto1();
 }
+
+bool checkRFIDConnected() {
+  byte v = mfrc522.PCD_ReadRegister(MFRC522::PCD_Register::VersionReg);
+  // Si el lector está desconectado o el bus SPI no responde, devuelve 0x00 o 0xFF
+  if (v == 0x00 || v == 0xFF) {
+    return false;
+  }
+  return true;
+}
+

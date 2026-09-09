@@ -21,6 +21,10 @@ void playToneI2S(uint16_t freqHz, uint16_t durationMs, uint8_t volumePercent) {
   audioPowerDown();
 }
 
+bool isAudioReady() {
+  return true;
+}
+
 #else
 // ════════════════════════════════════════════════════════════════
 //  AUDIO NATIVO ESP32-S3 (I2S Digital MAX98357A con corte a 0 µA)
@@ -71,6 +75,10 @@ void audioInit() {
 void audioPowerDown() {
   digitalWrite(I2S_SD_PIN, LOW);
   isSoundPlaying = false;
+}
+
+bool isAudioReady() {
+  return i2sInstalled;
 }
 
 void playToneI2S(uint16_t freqHz, uint16_t durationMs, uint8_t volumePercent) {

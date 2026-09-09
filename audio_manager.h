@@ -24,4 +24,7 @@ void playToneI2S(uint16_t freqHz, uint16_t durationMs, uint8_t volumePercent = 8
 // Apaga manualmente el amplificador a 0 µA
 void audioPowerDown();
 
+// Comprueba si el subsistema de audio (I2S / DAC) está inicializado y listo
+bool isAudioReady();
+
 #endif // AUDIO_MANAGER_H

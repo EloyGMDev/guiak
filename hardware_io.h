@@ -15,4 +15,7 @@ void checkConfigButton();
 // Comprueba de forma no bloqueante si hay una tarjeta RFID presente
 void handleRFID();
 
+// Comprueba si el lector RFID MFRC522 está presente y respondiendo en el bus SPI
+bool checkRFIDConnected();
+
 #endif // HARDWARE_IO_H
