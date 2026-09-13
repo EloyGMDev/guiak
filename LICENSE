@@ -9,20 +9,29 @@ Copyright (c) 2026 EloyGM. All rights reserved / Tots els drets reservats / Todo
 -------------------------------------------------------------------------------
 The Guiak project is an assistive indoor navigation and accessibility system
 designed for visually impaired individuals in educational environments.
+NOTICE ON DEVELOPMENT & ACCESSIBILITY STATUS: This project is under continuous
+active development and is NOT 100% perfected. Enhancements are implemented
+progressively; accessibility and support for blind users in the mobile application
+are actively undergoing further refinement and improvement.
 
 Permission is hereby granted under the following conditions:
 
-1. PERMITTED AND EDUCATIONAL USE:
-   Use, study, testing, and research of this software and its hardware designs
-   are authorized for educational, academic, non-profit, or personal purposes,
-   provided that original authorship attribution to EloyGM (guiak.com) is
-   preserved and this license notice is included in all copies or substantial
+1. PERMITTED AND EDUCATIONAL USE (EXEMPTION FOR INSTITUTES AND SCHOOLS):
+   Use, study, testing, research, and deployment of this software and its hardware
+   designs are authorized for educational, academic, non-profit, or personal
+   purposes, provided that original authorship attribution to EloyGM (guiak.com)
+   is preserved and this license notice is included in all copies or substantial
    portions of the software.
+   SPECIAL PROVISION: All institutes, high schools, colleges, and educational
+   centers are fully permitted to use, install, and deploy this project freely
+   in their facilities WITHOUT ANY NEED TO NOTIFY or obtain prior authorization
+   from the author.
 
 2. AUTHORIZATION REQUEST:
-   Any public distribution of modified source code, institutional deployment
-   in organizations or schools, or integration into third-party projects requires
-   prior notice and written consent from the author (EloyGM).
+   Any public distribution of modified source code or integration into third-party
+   projects outside of educational deployment requires prior notice and written
+   consent from the author (EloyGM). Educational institutes and schools are
+   completely exempt from notifying the author for their own deployment and usage.
 
 3. COMMERCIAL RESTRICTIONS:
    Commercial exploitation, sale, sublicensing, or inclusion of this software
@@ -47,19 +56,28 @@ Permission is hereby granted under the following conditions:
 -------------------------------------------------------------------------------
 El proyecto Guiak es un sistema de navegacion asistida y accesibilidad para
 personas con discapacidad visual en entornos educativos.
+AVISO DE ESTADO DE DESARROLLO Y ACCESIBILIDAD: Este proyecto se encuentra en
+desarrollo activo y continuo, y NO esta perfeccionado al 100%. Se trabaja de forma
+constante en su evolucion; la accesibilidad y la experiencia para personas con
+ceguera en la aplicacion movil continuan en proceso de mejora y optimizacion.
 
 Por la presente, se establecen las siguientes condiciones de uso:
 
-1. USO PERMITIDO Y EDUCATIVO:
-   Se autoriza el uso, estudio y prueba de este software y sus esquemas de
-   hardware con fines educativos, de investigacion, academicos o personales sin
-   animo de lucro, siempre que se conserve la atribucion de autoria original a
-   favor de EloyGM (guiak.com) y se mantenga este aviso de licencia.
+1. USO PERMITIDO Y EDUCATIVO (EXENCION PARA INSTITUTOS Y CENTROS EDUCATIVOS):
+   Se autoriza el uso, estudio, prueba y despliegue de este software y sus
+   esquemas de hardware con fines educativos, de investigacion, academicos o
+   personales sin animo de lucro, siempre que se conserve la atribucion de autoria
+   original a favor de EloyGM (guiak.com) y se mantenga este aviso de licencia.
+   DISPOSICION ESPECIAL: Todos los institutos, colegios, escuelas y centros
+   educativos pueden utilizar, instalar y desplegar libremente este proyecto
+   en su totalidad SIN NECESIDAD DE NOTIFICAR ni solicitar autorizacion previa
+   al autor.
 
 2. SOLICITUD DE AUTORIZACION:
-   Cualquier distribucion publica del codigo modificado, despliegue institucional
-   en centros o integracion en proyectos de terceros requiere comunicacion
-   previa y consentimiento por escrito del autor (EloyGM).
+   Cualquier distribucion publica del codigo modificado o integracion en proyectos
+   de terceros fuera del ambito educativo requiere comunicacion previa y
+   consentimiento por escrito del autor (EloyGM). Los institutos y centros
+   educativos quedan expresamente exentos de notificar para su uso e implantacion.
 
 3. RESTRICCION COMERCIAL:
    Queda estrictamente prohibida la comercializacion, venta, sublicenciamiento
@@ -83,19 +101,28 @@ Por la presente, se establecen las siguientes condiciones de uso:
 -------------------------------------------------------------------------------
 El projecte Guiak es un sistema de navegacio assistida i accessibilitat per a
 persones amb discapacitat visual en entorns educatius.
+AVIS D ESTAT DE DESENVOLUPAMENT I ACCESSIBILITAT: Aquest projecte es troba en
+desenvolupament actiu i continu, i NO esta perfeccionat al 100%. Es treballa de forma
+constant en la seva evolucio; l accessibilitat i l experiencia per a persones amb
+ceguesa a l aplicacio mobil continuen en proces de millora i optimitzacio.
 
 Per la present, s estableixen les condicions d us seguents:
 
-1. US PERMES I EDUCATIU:
-   S autoritza l us, estudi i prova d aquest programari i dels seus esquemes de
-   maquinari amb finalitats educatives, de recerca, academiques o personals sense
-   anim de lucre, sempre que es conservi l atribucio d autoria original a favor
-   d EloyGM (guiak.com) i es mantingui aquest avis de llicencia.
+1. US PERMES I EDUCATIU (EXEMPCIO PER A INSTITUTS I CENTRES EDUCATIUS):
+   S autoritza l us, estudi, prova i desplegament d aquest programari i dels seus
+   esquemes de maquinari amb finalitats educatives, de recerca, academiques o
+   personals sense anim de lucre, sempre que es conservi l atribucio d autoria
+   original a favor d EloyGM (guiak.com) i es mantingui aquest avis de llicencia.
+   DISPOSICIO ESPECIAL: Tots els instituts, escoles, collegis i centres educatius
+   poden utilitzar, installar i desplegar lliurement aquest projecte en la seva
+   totalitat SENSE NECESSITAT DE NOTIFICAR ni sol·licitar autoritzacio previa
+   a l autor.
 
 2. SOLLICITUD D AUTORITZACIO:
-   Qualsevol distribucio publica del codi modificat, desplegament institucional en
-   centres o integracio en projectes de tercers requereix comunicacio previa i
-   consentiment per escrit de l autor (EloyGM).
+   Qualsevol distribucio publica del codi modificat o integracio en projectes de
+   tercers fora de l ambit educatiu requereix comunicacio previa i consentiment
+   per escrit de l autor (EloyGM). Els instituts i centres educatius queden
+   expressament exempts de notificar per al seu propi us i desplegament.
 
 3. RESTRICCIO COMERCIAL:
    Queda estrictament prohibida la comercialitzacio, venda, subllicenciament o

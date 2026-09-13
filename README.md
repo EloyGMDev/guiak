@@ -38,6 +38,14 @@
 > 
 > **Catala:** **Guiak** es l evolucio directa i successor oficial del projecte heretat **SONA**. El repositori original de SONA va neixer com a prototip educatiu per a presentar-se al concurs **mSchools**. Despres d aquella etapa inicial, el seu autor ha evolucionat el sistema cap a un projecte personal i independent amb una meta mes amplia: ajudar persones amb discapacitat visual a orientar-se tant a instituts i centres educatius com a edificis publics. Per aixo, el repositori inicial de SONA queda permanentment descontinuat i el desenvolupament actiu continua exclusivament dins l ecosistema Guiak a [guiak.com](https://guiak.com).
 
+> [!WARNING]
+> ### Estado de Desarrollo y Accesibilidad / Development & Accessibility Status / Estat de Desenvolupament i Accessibilitat
+> **Castellano:** Este proyecto se encuentra en **desarrollo activo continuo y NO está perfeccionado al 100%**. Cada vez se sigue desarrollando y mejorando más. Es importante señalar que **aún falta mejorar y perfeccionar el acceso y la experiencia de uso para personas ciegas en la aplicación móvil**, aspecto prioritario en el que se sigue trabajando activamente.
+> 
+> **English:** This project is under **active continuous development and is NOT 100% perfected**. It is constantly evolving and expanding. Note that **accessibility and user experience for blind individuals in the companion mobile app still require further improvement and refinement**, which is an active and ongoing area of development.
+> 
+> **Catala:** Aquest projecte es troba en **desenvolupament actiu continu i NO està perfeccionat al 100%**. Cada vegada se segueix desenvolupant i millorant més. És important assenyalar que **encara falta millorar i perfeccionar l'accés i l'experiència d'ús per a persones cegues a l'aplicació mòbil**, aspecte prioritari en què se segueix treballant activament.
+
 ---
 
 <details open>
@@ -117,10 +125,11 @@ By offloading device management, schedules, and logging directly to **Firebase R
 **Guiak** includes an official Android companion application designed specifically for blind and visually impaired students navigating educational centers.
 
 - **Direct Download:** [`apk/guiak-app-v3.0.apk`](./apk/guiak-app-v3.0.apk) (Ready to install on Android 8.0+).
+- **Development & Accessibility Notice:** *This application is under active development and is not 100% finalized. Enhancing accessibility and the interaction experience for blind and visually impaired users remains an active, ongoing priority.*
 - **Language Note:** *Currently, the mobile application user interface, synthetic voice prompts, and accessibility announcements are available exclusively in **Spanish (Castellano)**. Multilingual support (Catalan and English) is planned for upcoming releases.*
 
 #### Key Mobile Features:
-1. **100% TalkBack Native:** Complete semantic accessibility labels on every card, button, and indicator, designed for intuitive one-handed navigation while holding a white cane.
+1. **TalkBack Integration (Continuous Improvement):** High-contrast semantic controls and large touch targets, designed for one-handed navigation while holding a white cane.
 2. **"¿Dónde estoy?" Voice Assistance:** Tap anywhere on the high-contrast button to hear your current location, nearest classroom, floor, and estimated distance read aloud via text-to-speech.
 3. **Giant "Hacer sonar puerta" Trigger:** A high-contrast yellow button that instantly triggers the physical node's acoustic orientation pulse on the doorframe via Bluetooth GATT with sub-second latency.
 4. **Proximity Audio Radar:** Progressive acoustic sonar beeps that increase in tempo as the student approaches the classroom door.
@@ -173,10 +182,11 @@ Al centralizar la gestion, los horarios y los registros en **Firebase Realtime D
 El ecosistema **Guiak** incluye una aplicacion movil oficial para Android desarrollada especificamente para estudiantes con ceguera o baja vision.
 
 - **Descarga directa:** [`apk/guiak-app-v3.0.apk`](./apk/guiak-app-v3.0.apk) (Archivo APK listo para instalar en Android 8.0 o superior).
+- **Aviso de Desarrollo y Accesibilidad:** *Esta aplicacion se encuentra en desarrollo activo continuo y no esta perfeccionada al 100%. Se trabaja constantemente en su evolucion; aun falta perfeccionar y optimizar el acceso y la experiencia de uso para personas con ceguera total.*
 - **Nota de idioma:** *Actualmente, la aplicacion movil, sus locuciones por voz (TTS) y todos los textos de la interfaz estan disponibles **unicamente en castellano**. En futuras versiones se incorporaran traducciones al catalan y al ingles.*
 
 #### Funcionalidades Principales de la App:
-1. **Accesibilidad Total con TalkBack:** Botones gigantes de alto contraste (negro puro, amarillo trafico `#FFD700` y cyan `#00E5FF`) y etiquetas semanticas completas, optimizadas para su manejo con una sola mano mientras se camina con baston.
+1. **Integracion con TalkBack (En Mejora Continua):** Botones gigantes de alto contraste (negro puro, amarillo trafico `#FFD700` y cyan `#00E5FF`) y etiquetas semanticas completas, optimizadas para su manejo con una sola mano mientras se camina con baston.
 2. **Boton "¿Donde estoy?" (Repetir voz):** Pulsa la pantalla para que la sintesis de voz te anuncie al instante el aula mas cercana, la planta del edificio y los metros de distancia estimados.
 3. **Boton gigante "HACER SONAR PUERTA":** Activa de forma inmediata el zumbador o altavoz fisico instalado en el marco de la puerta del aula mediante Bluetooth GATT para orientarse por ecolocalizacion.
 4. **Radar Sonoro de Proximidad:** Emite pitidos de sonar que aumentan su cadencia a medida que la persona se acerca a la puerta.
@@ -230,10 +240,11 @@ En centralitzar la gestio, els horaris i els registres a **Firebase Realtime Dat
 L'ecosistema **Guiak** inclou una aplicacio mobil oficial per a Android desenvolupada especificament per a estudiants amb discapacitat visual o baixa visio.
 
 - **Descarrega directa:** [`apk/guiak-app-v3.0.apk`](./apk/guiak-app-v3.0.apk) (Fitxer APK llest per a installar en Android 8.0 o superior).
+- **Avis de Desenvolupament i Accessibilitat:** *Aquesta aplicacio es troba en desenvolupament actiu continu i no esta perfeccionada al 100%. Es treballa constantment en la seva evolucio; encara falta perfeccionar i optimitzar l'acces i l'experiencia d'us per a persones amb ceguesa total.*
 - **Nota d'idioma:** *Actualment, l'aplicacio mobil, les seves locucions per veu (TTS) i tots els textos de la interficie estan disponibles **unicament en castella**. En futures versions s'incorporaran traduccions al catala i a l'angles.*
 
 #### Funcionalitats Principals de l'App:
-1. **Accessibilitat Total amb TalkBack:** Botons gegants d'alt contrast (negre pur, groc transit `#FFD700` i cian `#00E5FF`) i etiquetes semantiques completes pensades per a utilitzar amb una sola ma mentre es camina amb basto.
+1. **Integracio amb TalkBack (En Millora Continua):** Botons gegants d'alt contrast (negre pur, groc transit `#FFD700` i cian `#00E5FF`) i etiquetes semantiques completes pensades per a utilitzar amb una sola ma mentre es camina amb basto.
 2. **Boto "¿Donde estoy?" (Repetir veu):** Toca la pantalla per a escoltar per sintesi de veu l'aula mes propera, la planta i la distancia estimada.
 3. **Boto gegant "HACER SONAR PUERTA":** Activa a l'instant el pols acustic del marc de la porta via Bluetooth GATT per a orientar-se per ecolocalitzacio.
 4. **Radar Sonor de Proximitat:** Emet xiulets continus que acceleren com mes a prop estiguis de la porta.
